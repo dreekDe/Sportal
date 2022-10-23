@@ -5,6 +5,7 @@ import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
 import com.dreekde.sportal.model.repositories.UserRepository;
 import com.dreekde.sportal.service.UserService;
@@ -14,7 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author Desislava Tencheva
@@ -22,6 +25,7 @@ import java.util.regex.Pattern;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String USER_NOT_FOUND = "User not found!";
     private static final String WRONG_CREDENTIAL = "Wrong credentials!";
     private static final String INVALID_DATA = "Name can not be shorter than 2 or longer than 15 symbols!";
     private static final String INVALID_PASSWORD = "Password can not be shorter then 8 symbols!";
@@ -42,7 +46,17 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+    public List<UserWithoutPasswordDTO> getAllUsers() {
+        List<User> allUsers = userRepository.findAll();
+        return allUsers.stream().filter(User::isActive)
+                .map(user -> modelMapper.map(user, UserWithoutPasswordDTO.class))
+                .collect(Collectors.toList());
+    }
 
+    public UserWithoutPasswordDTO getUserById(long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        return modelMapper.map(user, UserWithoutPasswordDTO.class);
+    }
     public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
         if (!isValidName(userLoginDTO.getUsername())
                 || !isValidPassword(userLoginDTO.getPassword())) {
