@@ -1,4 +1,4 @@
-package com.dreekde.sportal.model;
+package com.dreekde.sportal.model.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +10,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,29 +24,34 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "articles")
-public class Article {
-
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    @Column(nullable = false)
-    private String title;
+    private Long id;
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
     @Column(nullable = false)
-    private int views;
-    @Column
     private LocalDateTime postDate;
-    @OneToOne
-    @JoinColumn(referencedColumnName = "id", nullable = false)
-    private Category category;
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", nullable = false)
-    private User author;
-    private boolean isAvailable = true;
-    @OneToMany(mappedBy = "article")
-    private List<Comment> comments;
-    @OneToMany(mappedBy = "article")
-    private List<Image> images;
+    private Article article;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id", nullable = false)
+    private User owner;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    private Comment parent;
+    @ManyToMany
+    @JoinTable(
+            name = "users_like_comments",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "comment_id"))
+    private List<User> likers;
+    @ManyToMany
+    @JoinTable(
+            name = "users_dislike_comments",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "comment_id"))
+    private List<User> dislikers;
 }

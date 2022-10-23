@@ -1,4 +1,4 @@
-package com.dreekde.sportal.model;
+package com.dreekde.sportal.model.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

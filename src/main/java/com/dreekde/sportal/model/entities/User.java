@@ -1,4 +1,4 @@
-package com.dreekde.sportal.model;
+package com.dreekde.sportal.model.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,7 +40,7 @@ public class User {
     @Column(nullable = false)
     private LocalDate dateOfBirth;
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean isActive = true;
     @Column(nullable = false)
     private boolean isAdmin;
     @OneToMany(mappedBy = "author")

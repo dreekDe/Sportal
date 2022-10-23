@@ -1,0 +1,14 @@
+### register
+POST http://localhost:8080/users/register
+Content-Type: application/json
+
+{
+  "firstName" :  "Desislava",
+  "lastName" :  "Ivanova",
+  "username" :  "dreek",
+  "email" :  "dreek@abv.bg",
+  "password" :  "desislava123",
+  "confirm_password" :  "desislava123",
+  "dateOfBirth" :  "1984-06-05"
+}
+###
