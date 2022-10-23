@@ -1,5 +1,6 @@
 package com.dreekde.sportal.controller;
 
+import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.service.impl.UserServiceImpl;
@@ -26,5 +27,11 @@ public class UserController extends AbstractController{
     @PostMapping()
     public UserWithoutPasswordDTO register (@RequestBody UserRegisterDTO userRegisterDTO){
         return userService.register(userRegisterDTO);
+    }
+
+    @PostMapping("/auth")
+    public UserWithoutPasswordDTO login(@RequestBody UserLoginDTO userLoginDTO) {
+        //todo
+        return userService.login(userLoginDTO);
     }
 }

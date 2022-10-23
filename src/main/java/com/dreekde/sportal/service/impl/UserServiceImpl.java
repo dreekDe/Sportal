@@ -1,9 +1,11 @@
 package com.dreekde.sportal.service.impl;
 
+import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.UnauthorizedException;
 import com.dreekde.sportal.model.repositories.UserRepository;
 import com.dreekde.sportal.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -20,7 +22,9 @@ import java.util.regex.Pattern;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String INVALID_DATA = " cannot be shorter than 2 or longer than 15 characters!";
+    private static final String WRONG_CREDENTIAL = "Wrong credentials!";
+    private static final String INVALID_DATA = "Name can not be shorter than 2 or longer than 15 symbols!";
+    private static final String INVALID_PASSWORD = "Password can not be shorter then 8 symbols!";
     private static final String PASSWORDS_MISMATCH = "Passwords mismatch!";
     private static final String INVALID_AGE = "Invalid registration age";
     private static final String USERNAME_OR_EMAIL_ALREADY_EXIST = "Username or email already exist!";
@@ -39,55 +43,69 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
+        if (!isValidName(userLoginDTO.getUsername())
+                || !isValidPassword(userLoginDTO.getPassword())) {
+            throw new BadRequestException(WRONG_CREDENTIAL);
+        }
+        User user = userRepository.findByUsername(userLoginDTO.getUsername())
+                .orElseThrow(() -> new UnauthorizedException(WRONG_CREDENTIAL));
+        if (!bCryptPasswordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException(WRONG_CREDENTIAL);
+        }
+        return modelMapper.map(user, UserWithoutPasswordDTO.class);
+    }
+
     public UserWithoutPasswordDTO register(UserRegisterDTO userRegisterDTO) {
         validationUserRegisterDTO(userRegisterDTO);
         User user = modelMapper.map(userRegisterDTO, User.class);
-        System.out.println(user.getFirstName());
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         if (user.getId() == 1) {
             user.setAdmin(true);
             userRepository.save(user);
         }
-        System.out.println("tuka e");
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
     private void validationUserRegisterDTO(UserRegisterDTO userRegisterDTO) {
-        if(userRepository.existsByUsername(userRegisterDTO.getUsername())||
-                userRepository.existsByEmail(userRegisterDTO.getEmail())){
-            throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+        if (!isValidName(userRegisterDTO.getUsername())
+                || !isValidName(userRegisterDTO.getFirstName())
+                || !isValidName(userRegisterDTO.getLastName())) {
+            throw new BadRequestException(INVALID_DATA);
         }
-        validationInputText(userRegisterDTO.getUsername(), "Username");
-        validationInputText(userRegisterDTO.getFirstName(), "First name");
-        validationInputText(userRegisterDTO.getLastName(), "Last name");
-        validationPassword(userRegisterDTO.getPassword(), userRegisterDTO.getConfirmPassword());
-        validationEmail(userRegisterDTO.getEmail());
-        validationAge(userRegisterDTO.getDateOfBirth());
-    }
-
-    private void validationAge(LocalDate dateOfBirth) {
-        if (LocalDate.now().getYear() - dateOfBirth.getYear() < 18) {
-            throw new BadRequestException(INVALID_AGE);
+        if (!isValidPassword(userRegisterDTO.getPassword())) {
+            throw new BadRequestException(INVALID_PASSWORD);
         }
-    }
-
-    private void validationEmail(String email) {
-        String regex = "^[\\w]{2,}@[\\w]{1,}.[\\w]{2,3}$";
-        if(!Pattern.compile(regex).matcher(email).matches()){
-            throw new BadRequestException(INVALID_EMAIL);
-        }
-    }
-
-    private void validationPassword(String password, String confirmEmail) {
-        if (!password.equals(confirmEmail) || password.length() < 8) {
+        if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             throw new BadRequestException(PASSWORDS_MISMATCH);
         }
+        if (!isValidEmail(userRegisterDTO.getEmail())) {
+            throw new BadRequestException(INVALID_EMAIL);
+        }
+        if (!isValidAge(userRegisterDTO.getDateOfBirth())) {
+            throw new BadRequestException(INVALID_AGE);
+        }
+        if (userRepository.existsByUsername(userRegisterDTO.getUsername()) ||
+                userRepository.existsByEmail(userRegisterDTO.getEmail())) {
+            throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+        }
     }
 
-    private void validationInputText(String input, String message) {
-        if (input == null || input.length() >= 15 || input.length() < 2) {
-            throw new BadRequestException(message + INVALID_DATA);
-        }
+    private boolean isValidAge(LocalDate dateOfBirth) {
+        return LocalDate.now().getYear() - dateOfBirth.getYear() >= 18;
+    }
+
+    private boolean isValidEmail(String email) {
+        String regex = "^[\\w]{2,}@[\\w]{1,}.[\\w]{2,3}$";
+        return Pattern.compile(regex).matcher(email).matches();
+    }
+
+    private boolean isValidPassword(String password) {
+        return password != null && password.length() >= 8;
+    }
+
+    private boolean isValidName(String input) {
+        return input != null && input.length() >= 2 && input.length() < 15;
     }
 }
