@@ -29,6 +29,11 @@ public class ArticleController extends AbstractController {
         this.articleService = articleService;
     }
 
+    @GetMapping("/all")
+    public List<ArticleDTO> getAllArticles() {
+        return articleService.getAllArticles();
+    }
+
     @GetMapping("/categories/{cid}")
     public List<ArticleDTO> getAllArticleByCategory(@PathVariable long cid) {
         return articleService.getAllArticlesByCategory(cid);

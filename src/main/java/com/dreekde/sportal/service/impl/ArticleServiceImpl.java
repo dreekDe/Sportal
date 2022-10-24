@@ -82,6 +82,14 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(a -> modelMapper.map(a, ArticleDTO.class))
                 .collect(Collectors.toList());
     }
+    //TODO JPA Pagination
+    @Override
+    public List<ArticleDTO> getAllArticles() {
+        List<Article> articles = articleRepository.findAll();
+        return articles.stream()
+                .filter(Article::isAvailable)
+                .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());
+    }
 
     private User getAuthor(long id) {
         UserWithoutPasswordDTO userDTO = userService.getUserById(id);

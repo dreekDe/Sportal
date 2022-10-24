@@ -12,4 +12,6 @@ public interface ArticleService {
     long deleteArticle(long id);
 
     List<ArticleDTO> getAllArticlesByCategory(long cid);
+
+    List<ArticleDTO> getAllArticles();
 }
