@@ -1,5 +1,6 @@
 package com.dreekde.sportal.service.impl;
 
+import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,6 +47,24 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
+    public long deleteUser(UserDeleteDTO userDeleteDTO, long id) {
+        String password = userDeleteDTO.getPassword().trim();
+        if (!isValidPassword(password)) {
+            throw new BadRequestException(WRONG_CREDENTIAL);
+        }
+        matchingPasswords(password, userDeleteDTO.getConfirmPassword().trim());
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        String deleteMessage = String.valueOf(LocalDateTime.now());
+        user.setFirstName(deleteMessage);
+        user.setLastName(deleteMessage);
+        user.setUsername(deleteMessage);
+        user.setEmail(deleteMessage);
+        user.setActive(false);
+        userRepository.save(user);
+        return user.getId();
     }
 
     @Override
@@ -103,9 +123,9 @@ public class UserServiceImpl implements UserService {
         if (!isValidPassword(password)) {
             throw new BadRequestException(INVALID_PASSWORD);
         }
-        if (!password.equals(userRegisterDTO.getConfirmPassword().trim())) {
-            throw new BadRequestException(PASSWORDS_MISMATCH);
-        }
+
+        matchingPasswords(userRegisterDTO.getConfirmPassword().trim(), password);
+
         if (!isValidEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(INVALID_EMAIL);
         }
@@ -115,6 +135,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByUsername(username) ||
                 userRepository.existsByEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+        }
+    }
+
+    private void matchingPasswords(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw new BadRequestException(PASSWORDS_MISMATCH);
         }
     }
 

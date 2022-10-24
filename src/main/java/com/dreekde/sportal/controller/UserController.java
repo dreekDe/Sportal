@@ -1,11 +1,15 @@
 package com.dreekde.sportal.controller;
 
+import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
+import com.dreekde.sportal.model.exceptions.AuthenticationException;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
 import com.dreekde.sportal.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +33,9 @@ public class UserController extends AbstractController {
     private static final String WRONG_CREDENTIAL = "Wrong credential!";
     private static final String ALREADY_LOGGED = "You already logged!";
     private static final String LOGOUT = "Logout success!";
+    private static final String NOT_LOGGED = "You are not logged!";
+    private static final String NOT_ALLOWED = "Not allowed operation!";
+    private static final String UNAUTHORIZED = "Not authorized!";
 
     private final UserServiceImpl userService;
 
@@ -69,5 +76,21 @@ public class UserController extends AbstractController {
     public String logout(HttpSession session, HttpServletResponse response) {
         session.invalidate();
         return LOGOUT;
+    }
+
+    @DeleteMapping("/{uid}")
+    public long deleteUser(@PathVariable long uid, @RequestBody UserDeleteDTO userDeleteDTO,
+                           HttpServletRequest request) {
+        long userId = getLoggedUserId(request);
+        if (userId <= 0) {
+            throw new BadRequestException(NOT_LOGGED);
+        }
+        if (userId == uid || isAdmin(userId)) {
+            return userService.deleteUser(userDeleteDTO, uid);
+        }
+        if (userId != uid) {
+            throw new MethodNotAllowedException(NOT_ALLOWED);
+        }
+        throw new AuthenticationException(UNAUTHORIZED);
     }
 }

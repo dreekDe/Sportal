@@ -3,6 +3,7 @@ package com.dreekde.sportal.controller;
 import com.dreekde.sportal.model.dto.ExceptionDTO;
 import com.dreekde.sportal.model.exceptions.AuthenticationException;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
 import com.dreekde.sportal.service.UserService;
@@ -26,6 +27,16 @@ public abstract class AbstractController {
 
     @Autowired
     private UserService userService;
+
+    @ExceptionHandler(MethodNotAllowedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    private ExceptionDTO handleMethodNotAllowed(Exception message) {
+        ExceptionDTO exceptionDTO = new ExceptionDTO();
+        exceptionDTO.setStatus(HttpStatus.METHOD_NOT_ALLOWED.value());
+        exceptionDTO.setDateTime(LocalDateTime.now());
+        exceptionDTO.setMessage(message.getMessage());
+        return exceptionDTO;
+    }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
