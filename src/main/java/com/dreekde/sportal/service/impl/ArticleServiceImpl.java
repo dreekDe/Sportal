@@ -2,6 +2,7 @@ package com.dreekde.sportal.service.impl;
 
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
+import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.category.CategoryDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Article;
@@ -91,14 +92,26 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());
     }
 
+    @Override
+    public ArticleDetailsDTO getArticleById(long id) {
+        Article article = getArticleId(id);
+        article.setViews(article.getViews() + 1);
+        articleRepository.save(article);
+        return modelMapper.map(article, ArticleDetailsDTO.class);
+    }
+
+    private Article getArticleId(long id) {
+        return articleRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
+    }
+
     private User getAuthor(long id) {
         UserWithoutPasswordDTO userDTO = userService.getUserById(id);
         return modelMapper.map(userDTO, User.class);
     }
 
     private Category getCategory(long id) {
-        CategoryDTO categoryDTO =
-                categoryService.getCategoryById(id);
+        CategoryDTO categoryDTO = categoryService.getCategoryById(id);
         return modelMapper.map(categoryDTO, Category.class);
     }
 

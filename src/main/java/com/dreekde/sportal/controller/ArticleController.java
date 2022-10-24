@@ -2,6 +2,7 @@ package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
+import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.service.ArticleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +28,11 @@ public class ArticleController extends AbstractController {
 
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
+    }
+
+    @GetMapping("/{id}")
+    public ArticleDetailsDTO getArticleDetails(@PathVariable long id) {
+        return articleService.getArticleById(id);
     }
 
     @GetMapping("/all")
