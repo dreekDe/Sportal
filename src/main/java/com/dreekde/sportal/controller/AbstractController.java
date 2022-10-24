@@ -1,6 +1,7 @@
 package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.ExceptionDTO;
+import com.dreekde.sportal.model.exceptions.AuthenticationException;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
@@ -26,6 +27,12 @@ public abstract class AbstractController {
     @Autowired
     private UserService userService;
 
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ExceptionDTO handleNotAuthorized(Exception message) {
+        return creatExceptionDTO(message, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     private ExceptionDTO notFoundException(Exception message) {
@@ -46,7 +53,7 @@ public abstract class AbstractController {
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionDTO handleAllOthers(Exception exception){
+    public ExceptionDTO handleAllOthers(Exception exception) {
         return creatExceptionDTO(exception, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -75,7 +82,7 @@ public abstract class AbstractController {
         if (isLogged(request, session)) {
             return (long) session.getAttribute(USER_ID);
         }
-        return 0;
+        return 0;//TODO
     }
 
     private boolean isLogged(HttpServletRequest request, HttpSession session) {
