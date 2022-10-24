@@ -32,6 +32,11 @@ public class ArticleController extends AbstractController {
         this.articleService = articleService;
     }
 
+    @GetMapping("/topFive")
+    public List<ArticleDTO> getTopFiveArticles() {
+        return articleService.getTopFiveDailyArticles();
+    }
+
     @GetMapping("/{id}")
     public ArticleDetailsDTO getArticleDetails(@PathVariable long id) {
         return articleService.getArticleById(id);

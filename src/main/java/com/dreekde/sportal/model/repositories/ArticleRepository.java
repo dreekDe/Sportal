@@ -1,5 +1,6 @@
 package com.dreekde.sportal.model.repositories;
 
+import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.entities.Article;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findAll();
 
     List<Article> findAllByCategory_id(long id);
+
+    @Query(value = "SELECT * FROM sportal.articles" +
+            " WHERE date(post_date) = current_date " +
+            "AND is_available = true " +
+            "ORDER BY views DESC LIMIT 5",
+            nativeQuery = true)
+    List<Article> topFiveArticles();
 }

@@ -50,6 +50,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    public List<ArticleDTO> getTopFiveDailyArticles() {
+        List<Article> currArticles = articleRepository.topFiveArticles();
+        List<ArticleDTO> topFiveArticles = new LinkedList<>();
+        for (Article article : currArticles) {
+            topFiveArticles.add(modelMapper.map(article, ArticleDTO.class));
+        }
+        return topFiveArticles;
+    }
+
+    @Override
     public ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO) {
         validateInputString(articleCreateDTO.getTitle());
         validateInputString(articleCreateDTO.getText());
@@ -75,7 +85,6 @@ public class ArticleServiceImpl implements ArticleService {
     //TODO Pagination
     @Override
     public List<ArticleDTO> getAllArticlesByCategory(long id) {
-        categoryService.getCategoryById(id);
         List<Article> allByCategory = articleRepository.findAllByCategory_id(id);
         return allByCategory.stream()
                 .filter(Article::isAvailable)

@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ArticleService {
 
+    List<ArticleDTO> getTopFiveDailyArticles();
+
     ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO);
 
     long deleteArticle(long id);
