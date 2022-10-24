@@ -8,6 +8,7 @@ import com.dreekde.sportal.model.entities.Article;
 import com.dreekde.sportal.model.entities.Category;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.repositories.ArticleRepository;
 import com.dreekde.sportal.service.ArticleService;
 import com.dreekde.sportal.service.CategoryService;
@@ -26,6 +27,7 @@ import java.util.LinkedList;
 public class ArticleServiceImpl implements ArticleService {
 
     private static final String MISSING_TEXT = "Title or text can not be empty!";
+    private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
 
     private final CategoryService categoryService;
     private final ModelMapper modelMapper;
@@ -45,7 +47,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO) {
-        validateInputString(articleCreateDTO.getText());
+        validateInputString(articleCreateDTO.getTitle());
         validateInputString(articleCreateDTO.getText());
         Article article = modelMapper.map(articleCreateDTO, Article.class);
         article.setViews(0);
@@ -56,6 +58,15 @@ public class ArticleServiceImpl implements ArticleService {
         article.setImages(new LinkedList<>());//todo
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
+    }
+
+    @Override
+    public long deleteArticle(long id) {
+        Article article = articleRepository.findById(id).
+                orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
+        article.setAvailable(false);
+        articleRepository.save(article);
+        return article.getId();
     }
 
     private User getAuthor(long id) {

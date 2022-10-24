@@ -6,4 +6,6 @@ import com.dreekde.sportal.model.dto.article.ArticleDTO;
 public interface ArticleService {
 
     ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO);
+
+    long deleteArticle(long id);
 }
