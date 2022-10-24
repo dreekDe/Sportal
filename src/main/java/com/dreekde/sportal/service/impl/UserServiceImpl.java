@@ -1,6 +1,7 @@
 package com.dreekde.sportal.service.impl;
 
 import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
+import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
@@ -47,6 +48,24 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
+    public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO, long id) {
+        String password = userEditPasswordDTO.getOldPassword().trim();
+        if (!isValidPassword(password)
+                || (!isValidPassword(userEditPasswordDTO.getNewPassword()))) {
+            throw new BadRequestException(WRONG_CREDENTIAL);
+        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+            throw new UnauthorizedException(WRONG_CREDENTIAL);
+        }
+        matchingPasswords(userEditPasswordDTO.getNewPassword().trim(),
+                userEditPasswordDTO.getConfirmPassword().trim());
+        user.setPassword(bCryptPasswordEncoder.encode(userEditPasswordDTO.getNewPassword()));
+        userRepository.save(user);
+        return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
     public long deleteUser(UserDeleteDTO userDeleteDTO, long id) {

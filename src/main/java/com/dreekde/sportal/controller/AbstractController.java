@@ -31,11 +31,7 @@ public abstract class AbstractController {
     @ExceptionHandler(MethodNotAllowedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     private ExceptionDTO handleMethodNotAllowed(Exception message) {
-        ExceptionDTO exceptionDTO = new ExceptionDTO();
-        exceptionDTO.setStatus(HttpStatus.METHOD_NOT_ALLOWED.value());
-        exceptionDTO.setDateTime(LocalDateTime.now());
-        exceptionDTO.setMessage(message.getMessage());
-        return exceptionDTO;
+      return creatExceptionDTO(message,HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(AuthenticationException.class)

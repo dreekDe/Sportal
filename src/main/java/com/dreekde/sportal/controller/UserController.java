@@ -1,6 +1,7 @@
 package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
+import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +75,7 @@ public class UserController extends AbstractController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpSession session, HttpServletResponse response) {
+    public String logout(HttpSession session) {
         session.invalidate();
         return LOGOUT;
     }
@@ -92,5 +94,21 @@ public class UserController extends AbstractController {
             throw new MethodNotAllowedException(NOT_ALLOWED);
         }
         throw new AuthenticationException(UNAUTHORIZED);
+    }
+
+    @PutMapping("/{uid}")
+    public long changePassword(@PathVariable long uid,
+                               @RequestBody UserEditPasswordDTO userEditPasswordDTO,
+                               HttpServletRequest request) {
+        long userId = getLoggedUserId(request);
+        if (userId <= 0) {
+            throw new BadRequestException(NOT_LOGGED);
+        }
+        if (userId != uid) {
+            throw new MethodNotAllowedException(NOT_ALLOWED);
+        }
+        userId = userService.changePassword(userEditPasswordDTO, uid).getId();
+        request.getSession().invalidate();
+        return userId;
     }
 }
