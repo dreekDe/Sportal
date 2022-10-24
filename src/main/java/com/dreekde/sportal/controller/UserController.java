@@ -3,6 +3,7 @@ package com.dreekde.sportal.controller;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
+import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -20,6 +22,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController extends AbstractController{
+
+    private static final String WRONG_CREDENTIAL = "Wrong credential!";
+    private static final String ALREADY_LOGGED = "You already logged!";
 
     private final UserServiceImpl userService;
 
@@ -43,8 +48,15 @@ public class UserController extends AbstractController{
     }
 
     @PostMapping("/auth")
-    public UserWithoutPasswordDTO login(@RequestBody UserLoginDTO userLoginDTO) {
-        //todo
-        return userService.login(userLoginDTO);
+    public UserWithoutPasswordDTO login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        if (getLoggedUserId(request) > 0) {
+            throw new BadRequestException(ALREADY_LOGGED);
+        }
+        UserWithoutPasswordDTO user = userService.login(userLoginDTO);
+        if (user != null) {
+            loginUser(request, user.getId());
+            return user;
+        }
+        throw new BadRequestException(WRONG_CREDENTIAL);
     }
 }

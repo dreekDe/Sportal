@@ -58,13 +58,14 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
     public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
-        if (!isValidName(userLoginDTO.getUsername())
-                || !isValidPassword(userLoginDTO.getPassword())) {
+        String username = userLoginDTO.getUsername().trim();
+        String password = userLoginDTO.getPassword().trim();
+        if (!isValidName(username) || !isValidPassword(password)) {
             throw new BadRequestException(WRONG_CREDENTIAL);
         }
-        User user = userRepository.findByUsername(userLoginDTO.getUsername())
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedException(WRONG_CREDENTIAL));
-        if (!bCryptPasswordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new UnauthorizedException(WRONG_CREDENTIAL);
         }
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
@@ -83,25 +84,27 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validationUserRegisterDTO(UserRegisterDTO userRegisterDTO) {
-        if (!isValidName(userRegisterDTO.getUsername())
+        String username = userRegisterDTO.getUsername().trim();
+        String password = userRegisterDTO.getPassword().trim();
+        if (!isValidName(username)
                 || !isValidName(userRegisterDTO.getFirstName())
                 || !isValidName(userRegisterDTO.getLastName())) {
             throw new BadRequestException(INVALID_DATA);
         }
-        if (!isValidPassword(userRegisterDTO.getPassword())) {
+        if (!isValidPassword(password)) {
             throw new BadRequestException(INVALID_PASSWORD);
         }
-        if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
+        if (!password.equals(userRegisterDTO.getConfirmPassword().trim())) {
             throw new BadRequestException(PASSWORDS_MISMATCH);
         }
-        if (!isValidEmail(userRegisterDTO.getEmail())) {
+        if (!isValidEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(INVALID_EMAIL);
         }
         if (!isValidAge(userRegisterDTO.getDateOfBirth())) {
             throw new BadRequestException(INVALID_AGE);
         }
-        if (userRepository.existsByUsername(userRegisterDTO.getUsername()) ||
-                userRepository.existsByEmail(userRegisterDTO.getEmail())) {
+        if (userRepository.existsByUsername(username) ||
+                userRepository.existsByEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
         }
     }
