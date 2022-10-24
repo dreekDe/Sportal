@@ -62,14 +62,16 @@ public class UserController extends AbstractController {
     }
 
     @PostMapping("/auth")
-    public UserWithoutPasswordDTO login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
-        if (getLoggedUserId(request) > 0) {
-            throw new BadRequestException(ALREADY_LOGGED);
-        }
-        UserWithoutPasswordDTO user = userService.login(userLoginDTO);
-        if (user != null) {
+    public UserWithoutPasswordDTO login(@RequestBody UserLoginDTO userLoginDTO,
+                                        HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (session.isNew() || !isLogged(request)) {
+            UserWithoutPasswordDTO user = userService.login(userLoginDTO);
             loginUser(request, user.getId());
             return user;
+        }
+        if (getLoggedUserId(session) > 0) {
+            throw new BadRequestException(ALREADY_LOGGED);
         }
         throw new BadRequestException(WRONG_CREDENTIAL);
     }
@@ -83,7 +85,7 @@ public class UserController extends AbstractController {
     @DeleteMapping("/{uid}")
     public long deleteUser(@PathVariable long uid, @RequestBody UserDeleteDTO userDeleteDTO,
                            HttpServletRequest request) {
-        long userId = getLoggedUserId(request);
+        long userId = getLoggedUserId(request.getSession());
         if (userId <= 0) {
             throw new BadRequestException(NOT_LOGGED);
         }
@@ -100,7 +102,7 @@ public class UserController extends AbstractController {
     public long changePassword(@PathVariable long uid,
                                @RequestBody UserEditPasswordDTO userEditPasswordDTO,
                                HttpServletRequest request) {
-        long userId = getLoggedUserId(request);
+        long userId = getLoggedUserId(request.getSession());
         if (userId <= 0) {
             throw new BadRequestException(NOT_LOGGED);
         }

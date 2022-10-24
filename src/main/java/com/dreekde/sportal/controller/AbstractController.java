@@ -21,9 +21,11 @@ import java.time.LocalDateTime;
  */
 public abstract class AbstractController {
 
+    private static final String UNAUTHORIZED = "Not authorized!";
     protected static final String LOGGED = "LOGGED";
     protected static final String USER_ID = "USER_ID";
     private static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
+    private static final String NOT_LOGGED = "You are not logged!";
 
     @Autowired
     private UserService userService;
@@ -31,7 +33,7 @@ public abstract class AbstractController {
     @ExceptionHandler(MethodNotAllowedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     private ExceptionDTO handleMethodNotAllowed(Exception message) {
-      return creatExceptionDTO(message,HttpStatus.METHOD_NOT_ALLOWED);
+        return creatExceptionDTO(message, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -73,29 +75,38 @@ public abstract class AbstractController {
         return exceptionDTO;
     }
 
-    public boolean isAdmin(long id) {
-        return userService.userIsAdmin(id);
-    }
-
-    public void loginUser(HttpServletRequest request, long id) {
+    protected void loginUser(HttpServletRequest request, long id) {
         HttpSession session = request.getSession();
         session.setAttribute(LOGGED, true);
         session.setAttribute(USER_ID, id);
         session.setAttribute(REMOTE_ADDRESS, request.getRemoteAddr());
     }
 
-    public long getLoggedUserId(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        if (isLogged(request, session)) {
-            return (long) session.getAttribute(USER_ID);
+    protected long getLoggedUserId(HttpSession session) {
+        if (session.getAttribute(USER_ID) == null) {
+            throw new AuthenticationException(NOT_LOGGED);
         }
-        return 0;//TODO
+        return (long) session.getAttribute(USER_ID);
     }
 
-    private boolean isLogged(HttpServletRequest request, HttpSession session) {
+    protected boolean isLogged(HttpServletRequest request) {
+        HttpSession session = request.getSession();
         return !session.isNew()
                 && session.getAttribute(LOGGED) != null
                 && (boolean) session.getAttribute(LOGGED)
                 && request.getRemoteAddr().equals(session.getAttribute(REMOTE_ADDRESS));
+    }
+
+    protected void validatePermission(HttpSession session) {
+        long loggedUserId = getLoggedUserId(session);
+        if (loggedUserId > 0) {
+            if (!isAdmin(loggedUserId)) {
+                throw new AuthenticationException(UNAUTHORIZED);
+            }
+        }
+    }
+
+    protected boolean isAdmin(long id) {
+        return userService.userIsAdmin(id);
     }
 }
