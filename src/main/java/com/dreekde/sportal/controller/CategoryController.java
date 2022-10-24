@@ -54,7 +54,7 @@ public class CategoryController extends AbstractController {
 
     @DeleteMapping("/{cid}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String deleteCategory(@PathVariable long cid, HttpServletRequest request) {
+    public long deleteCategory(@PathVariable long cid, HttpServletRequest request) {
      long loggedUserId = getLoggedUserId(request);
         if (loggedUserId > 0) {
             if (isAdmin(loggedUserId)) {

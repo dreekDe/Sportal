@@ -24,7 +24,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private static final String CATEGORY_ALREADY_EXIST = "Category already exists!";
     private static final String CATEGORY_NOT_FOUND = "Category not found!";
-    private static final String DELETED_CATEGORY_SUCCESS = "Delete category successfully!";
     private static final String INVALID_CATEGORY_NAME = "Category can not be empty!";
 
     private final CategoryRepository categoryRepository;
@@ -65,12 +64,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public String deleteCategory(long id) {
+    public long deleteCategory(long id) {
         Category category = categoryRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
         category.setAvailable(false);
         categoryRepository.save(category);
-        return DELETED_CATEGORY_SUCCESS;
+        return category.getId();
     }
 
     private void validateInputString(String string, String message) {
