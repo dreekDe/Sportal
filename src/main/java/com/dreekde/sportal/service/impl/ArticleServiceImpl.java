@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Desislava Tencheva
@@ -26,6 +28,7 @@ import java.util.LinkedList;
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
+    private static final String CATEGORY_NOT_FOUND = "Category not found!";
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
 
@@ -67,6 +70,17 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAvailable(false);
         articleRepository.save(article);
         return article.getId();
+    }
+    //TODO Pagination
+    @Override
+    public List<ArticleDTO> getAllArticlesByCategory(long id) {
+        categoryService.getCategoryById(id);
+        List<Article> allByCategory = articleRepository.findAllByCategory_id(id);
+        return allByCategory.stream()
+                .filter(Article::isAvailable)
+                .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))
+                .map(a -> modelMapper.map(a, ArticleDTO.class))
+                .collect(Collectors.toList());
     }
 
     private User getAuthor(long id) {
