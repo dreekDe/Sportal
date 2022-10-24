@@ -4,6 +4,8 @@ import com.dreekde.sportal.model.dto.ExceptionDTO;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
+import com.dreekde.sportal.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -20,6 +22,9 @@ public abstract class AbstractController {
     protected static final String LOGGED = "LOGGED";
     protected static final String USER_ID = "USER_ID";
     private static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
+
+    @Autowired
+    private UserService userService;
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -39,12 +44,23 @@ public abstract class AbstractController {
         return creatExceptionDTO(message, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = Exception.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionDTO handleAllOthers(Exception exception){
+        return creatExceptionDTO(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private ExceptionDTO creatExceptionDTO(Exception message, HttpStatus httpStatus) {
+        message.printStackTrace(); //todo logger
         ExceptionDTO exceptionDTO = new ExceptionDTO();
         exceptionDTO.setStatus(httpStatus.value());
         exceptionDTO.setDateTime(LocalDateTime.now());
         exceptionDTO.setMessage(message.getMessage());
         return exceptionDTO;
+    }
+
+    public boolean isAdmin(long id) {
+        return userService.userIsAdmin(id);
     }
 
     public void loginUser(HttpServletRequest request, long id) {

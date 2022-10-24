@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface UserService {
 
+    boolean userIsAdmin(long id);
+
     List<UserWithoutPasswordDTO> getAllUsers();
 
     UserWithoutPasswordDTO getUserById(long id);

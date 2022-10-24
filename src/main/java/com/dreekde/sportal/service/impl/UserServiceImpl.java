@@ -46,6 +46,14 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+
+    @Override
+    public boolean userIsAdmin(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        return user.isAdmin();
+    }
+
     public List<UserWithoutPasswordDTO> getAllUsers() {
         List<User> allUsers = userRepository.findAll();
         return allUsers.stream().filter(User::isActive)
@@ -57,6 +65,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
+
     public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
         String username = userLoginDTO.getUsername().trim();
         String password = userLoginDTO.getPassword().trim();

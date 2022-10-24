@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import java.util.List;
 
 /**
@@ -21,10 +24,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/users")
-public class UserController extends AbstractController{
+public class UserController extends AbstractController {
 
     private static final String WRONG_CREDENTIAL = "Wrong credential!";
     private static final String ALREADY_LOGGED = "You already logged!";
+    private static final String LOGOUT = "Logout success!";
 
     private final UserServiceImpl userService;
 
@@ -34,16 +38,17 @@ public class UserController extends AbstractController{
     }
 
     @GetMapping("/{uid}")
-    public UserWithoutPasswordDTO getUsersById(@PathVariable long uid){
+    public UserWithoutPasswordDTO getUsersById(@PathVariable long uid) {
         return userService.getUserById(uid);
     }
+
     @GetMapping()
-    public List<UserWithoutPasswordDTO> getAllUsers(){
+    public List<UserWithoutPasswordDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @PostMapping()
-    public UserWithoutPasswordDTO register (@RequestBody UserRegisterDTO userRegisterDTO){
+    public UserWithoutPasswordDTO register(@RequestBody UserRegisterDTO userRegisterDTO) {
         return userService.register(userRegisterDTO);
     }
 
@@ -58,5 +63,11 @@ public class UserController extends AbstractController{
             return user;
         }
         throw new BadRequestException(WRONG_CREDENTIAL);
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session, HttpServletResponse response) {
+        session.invalidate();
+        return LOGOUT;
     }
 }
