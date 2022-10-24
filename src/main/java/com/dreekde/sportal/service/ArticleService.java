@@ -3,6 +3,7 @@ package com.dreekde.sportal.service;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
+import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 
 import java.util.List;
 
@@ -17,4 +18,6 @@ public interface ArticleService {
     List<ArticleDTO> getAllArticles();
 
     ArticleDetailsDTO getArticleById(long id);
+
+    ArticleDTO editArticle(ArticleEditDTO articleEditDTO);
 }

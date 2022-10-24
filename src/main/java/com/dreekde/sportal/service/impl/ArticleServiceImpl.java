@@ -3,6 +3,7 @@ package com.dreekde.sportal.service.impl;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
+import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.category.CategoryDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Article;
@@ -29,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
-    private static final String CATEGORY_NOT_FOUND = "Category not found!";
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
 
@@ -98,6 +98,19 @@ public class ArticleServiceImpl implements ArticleService {
         article.setViews(article.getViews() + 1);
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDetailsDTO.class);
+    }
+
+    @Override
+    public ArticleDTO editArticle(ArticleEditDTO articleEditDTO) {
+        validateInputString(articleEditDTO.getTitle());
+        validateInputString(articleEditDTO.getText());
+        Article article = getArticleId(articleEditDTO.getId());
+        article.setViews(0);
+        article.setPostDate(LocalDateTime.now());
+        article.setCategory(getCategory(articleEditDTO.getCategory()));
+        article.setAuthor(getAuthor(articleEditDTO.getAuthor()));
+        articleRepository.save(article);
+        return modelMapper.map(article, ArticleDTO.class);
     }
 
     private Article getArticleId(long id) {
