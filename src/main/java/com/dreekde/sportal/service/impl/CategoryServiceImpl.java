@@ -36,6 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public CategoryDTO getCategoryById(long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
+        return modelMapper.map(category,CategoryDTO.class);
+    }
+
+    @Override
     public List<CategoryDTO> getAllCategories() {
         List<Category> allCategories = categoryRepository.findAll();
         return allCategories.stream()
@@ -56,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
             categoryRepository.save(currCategory.get());
             return modelMapper.map(currCategory.get(), CategoryDTO.class);
         }
-        validateInputString(categoryName, INVALID_CATEGORY_NAME);
+        validateInputString(categoryName);
         Category category = new Category();
         category.setName(categoryName);
         categoryRepository.save(category);
@@ -72,9 +79,9 @@ public class CategoryServiceImpl implements CategoryService {
         return category.getId();
     }
 
-    private void validateInputString(String string, String message) {
+    private void validateInputString(String string) {
         if (string == null || string.trim().isEmpty()) {
-            throw new BadRequestException(message);
+            throw new BadRequestException(CategoryServiceImpl.INVALID_CATEGORY_NAME);
         }
     }
 }
