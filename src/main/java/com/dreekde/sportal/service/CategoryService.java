@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface CategoryService {
 
+    CategoryDTO getCategoryById(long id);
+
     List<CategoryDTO> getAllCategories();
 
     CategoryDTO addCategory(CategoryCreateDto categoryCreateDto);

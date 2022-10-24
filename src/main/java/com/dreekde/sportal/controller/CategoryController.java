@@ -2,7 +2,6 @@ package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.category.CategoryCreateDto;
 import com.dreekde.sportal.model.dto.category.CategoryDTO;
-import com.dreekde.sportal.model.exceptions.AuthenticationException;
 import com.dreekde.sportal.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +24,6 @@ import java.util.List;
 @RequestMapping("/categories")
 public class CategoryController extends AbstractController {
 
-    private static final String UNAUTHORIZED = "Not authorized!";
-
     private final CategoryService categoryService;
 
     @Autowired
@@ -43,25 +40,15 @@ public class CategoryController extends AbstractController {
     @ResponseStatus(code = HttpStatus.CREATED)
     public CategoryDTO addCategory(@RequestBody CategoryCreateDto categoryCreateDto,
                                    HttpServletRequest request) {
-        long loggedUserId = getLoggedUserId(request);
-        if (loggedUserId > 0) {
-            if (isAdmin(loggedUserId)) {
-                return categoryService.addCategory(categoryCreateDto);
-            }
-        }
-        throw new AuthenticationException(UNAUTHORIZED);
+        validatePermission(request.getSession());
+        return categoryService.addCategory(categoryCreateDto);
     }
 
     @DeleteMapping("/{cid}")
     @ResponseStatus(code = HttpStatus.OK)
     public long deleteCategory(@PathVariable long cid, HttpServletRequest request) {
-     long loggedUserId = getLoggedUserId(request);
-        if (loggedUserId > 0) {
-            if (isAdmin(loggedUserId)) {
-                return categoryService.deleteCategory(cid);
-            }
-        }
-        throw new AuthenticationException(UNAUTHORIZED);
+        validatePermission(request.getSession());
+        return categoryService.deleteCategory(cid);
     }
 }
 
