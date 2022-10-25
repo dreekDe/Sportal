@@ -17,14 +17,20 @@ import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.repositories.ArticleRepository;
 import com.dreekde.sportal.service.ArticleService;
 import com.dreekde.sportal.service.CategoryService;
+import com.dreekde.sportal.service.ImageService;
 import com.dreekde.sportal.service.UserService;
+import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -37,6 +43,7 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
+    private static final String FILE_EXIST = "The file already exist!";
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
 
@@ -44,16 +51,17 @@ public class ArticleServiceImpl implements ArticleService {
     private final ModelMapper modelMapper;
     private final UserService userService;
     private final ArticleRepository articleRepository;
+    private final ImageService imageService;
 
     @Autowired
-    public ArticleServiceImpl(CategoryService categoryService,
-                              ModelMapper modelMapper,
-                              UserService userService,
-                              ArticleRepository articleRepository) {
+    public ArticleServiceImpl(CategoryService categoryService, ModelMapper modelMapper,
+                              UserService userService, ArticleRepository articleRepository,
+                              ImageService imageService) {
         this.categoryService = categoryService;
         this.modelMapper = modelMapper;
         this.userService = userService;
         this.articleRepository = articleRepository;
+        this.imageService = imageService;
     }
 
     @Override
@@ -140,6 +148,25 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAuthor(getAuthor(articleEditDTO.getAuthor()));
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
+    }
+
+    @Override
+    public long uploadArticleImage(long aid, MultipartFile file) {
+        try {
+            Article article = getArticleId(aid);
+            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+            String name = "uploads" + File.separator + System.nanoTime() + "." + ext;
+            File uploadFile = new File(name);
+            if (!uploadFile.exists()) {
+                Files.copy(file.getInputStream(), uploadFile.toPath());
+            } else {
+                throw new BadRequestException(FILE_EXIST);
+            }
+            String canonicalPath = uploadFile.getCanonicalPath();
+            return imageService.createImage(article, canonicalPath);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
     private Article getArticleId(long id) {

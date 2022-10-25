@@ -7,6 +7,7 @@ import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,4 +28,6 @@ public interface ArticleService {
     ArticleDTO editArticle(ArticleEditDTO articleEditDTO);
 
     List<ArticleDTO> getAllArticlesByTitle(PageRequestByTitle pageRequestByTitle);
+
+    long uploadArticleImage(long aid, MultipartFile file);
 }

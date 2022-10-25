@@ -8,6 +8,7 @@ import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.service.ArticleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -31,9 +34,11 @@ public class ArticleController extends AbstractController {
 
     private final ArticleService articleService;
 
+    @Autowired
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
     }
+
     @GetMapping("/find")
     public List<ArticleDTO> getArticlesByTitle(@RequestBody PageRequestByTitle
                                                            pageRequestByTitle) {
@@ -50,7 +55,7 @@ public class ArticleController extends AbstractController {
         return articleService.getArticleById(id);
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public List<ArticleDTO> getAllArticles(@RequestBody PageRequestDTO pageRequestDTO) {
         return articleService.getAllArticles(pageRequestDTO);
     }
@@ -67,6 +72,15 @@ public class ArticleController extends AbstractController {
                                  HttpSession session) {
         validatePermission(session);
         return articleService.createNewArticle(articleCreateDTO);
+    }
+
+    @PostMapping("/{aid}/image")
+    @ResponseStatus(code = HttpStatus.OK)
+    public long uploadArticleImage(@PathVariable long aid,
+                                       @RequestParam(value = "file") MultipartFile file,
+                                       HttpSession session) {
+        validatePermission(session);
+        return articleService.uploadArticleImage(aid, file);
     }
 
     @DeleteMapping("/{id}")
