@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import java.util.List;
@@ -82,34 +81,33 @@ public class UserController extends AbstractController {
         return LOGOUT;
     }
 
-    @DeleteMapping("/{uid}")
-    public long deleteUser(@PathVariable long uid, @RequestBody UserDeleteDTO userDeleteDTO,
+    @DeleteMapping()
+    public long deleteUser(@RequestBody UserDeleteDTO userDeleteDTO,
                            HttpServletRequest request) {
         long userId = getLoggedUserId(request.getSession());
         if (userId <= 0) {
             throw new BadRequestException(NOT_LOGGED);
         }
-        if (userId == uid || isAdmin(userId)) {
-            return userService.deleteUser(userDeleteDTO, uid);
+        if (userId == userDeleteDTO.getId() || isAdmin(userId)) {
+            return userService.deleteUser(userDeleteDTO);
         }
-        if (userId != uid) {
+        if (userId != userDeleteDTO.getId()) {
             throw new MethodNotAllowedException(NOT_ALLOWED);
         }
         throw new AuthenticationException(UNAUTHORIZED);
     }
 
-    @PutMapping("/{uid}")
-    public long changePassword(@PathVariable long uid,
-                               @RequestBody UserEditPasswordDTO userEditPasswordDTO,
+    @PutMapping("/pass")
+    public long changePassword(@RequestBody UserEditPasswordDTO userEditPasswordDTO,
                                HttpServletRequest request) {
         long userId = getLoggedUserId(request.getSession());
         if (userId <= 0) {
             throw new BadRequestException(NOT_LOGGED);
         }
-        if (userId != uid) {
+        if (userId != userEditPasswordDTO.getId()) {
             throw new MethodNotAllowedException(NOT_ALLOWED);
         }
-        userId = userService.changePassword(userEditPasswordDTO, uid).getId();
+        userId = userService.changePassword(userEditPasswordDTO).getId();
         request.getSession().invalidate();
         return userId;
     }

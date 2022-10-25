@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface UserService {
 
-    UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO, long id);
+    UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO);
 
-    long deleteUser(UserDeleteDTO userDeleteDTO, long id);
+    long deleteUser(UserDeleteDTO userDeleteDTO);
 
     boolean userIsAdmin(long id);
 

@@ -50,13 +50,13 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO, long id) {
+    public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO) {
         String password = userEditPasswordDTO.getOldPassword().trim();
         if (!isValidPassword(password)
                 || (!isValidPassword(userEditPasswordDTO.getNewPassword()))) {
             throw new BadRequestException(WRONG_CREDENTIAL);
         }
-        User user = userRepository.findById(id)
+        User user = userRepository.findById(userEditPasswordDTO.getId())
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new UnauthorizedException(WRONG_CREDENTIAL);
@@ -68,13 +68,13 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
-    public long deleteUser(UserDeleteDTO userDeleteDTO, long id) {
+    public long deleteUser(UserDeleteDTO userDeleteDTO) {
         String password = userDeleteDTO.getPassword().trim();
         if (!isValidPassword(password)) {
             throw new BadRequestException(WRONG_CREDENTIAL);
         }
         matchingPasswords(password, userDeleteDTO.getConfirmPassword().trim());
-        User user = userRepository.findById(id)
+        User user = userRepository.findById(userDeleteDTO.getId())
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         String deleteMessage = String.valueOf(LocalDateTime.now());
         user.setFirstName(deleteMessage);
@@ -101,7 +101,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserWithoutPasswordDTO getUserById(long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
@@ -142,9 +143,7 @@ public class UserServiceImpl implements UserService {
         if (!isValidPassword(password)) {
             throw new BadRequestException(INVALID_PASSWORD);
         }
-
         matchingPasswords(userRegisterDTO.getConfirmPassword().trim(), password);
-
         if (!isValidEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(INVALID_EMAIL);
         }
