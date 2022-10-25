@@ -1,10 +1,11 @@
 package com.dreekde.sportal.service;
 
-import com.dreekde.sportal.model.dto.PageRequestDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface ArticleService {
 
     long deleteArticle(long id);
 
-    List<ArticleDTO> getAllArticlesByCategory(long cid);
+    List<ArticleDTO> getAllArticlesByCategory(PageRequestWithCategoryDTO pageRequestWithCategoryDTO);
 
     List<ArticleDTO> getAllArticles(PageRequestDTO pageRequestDTO);
 

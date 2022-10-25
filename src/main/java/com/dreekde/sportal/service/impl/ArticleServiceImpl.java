@@ -1,11 +1,12 @@
 package com.dreekde.sportal.service.impl;
 
-import com.dreekde.sportal.model.dto.PageRequestDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.category.CategoryDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Article;
 import com.dreekde.sportal.model.entities.Category;
@@ -20,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -87,10 +89,12 @@ public class ArticleServiceImpl implements ArticleService {
         return article.getId();
     }
 
-    //TODO Pagination
     @Override
-    public List<ArticleDTO> getAllArticlesByCategory(long id) {
-        List<Article> allByCategory = articleRepository.findAllByCategory_id(id);
+    public List<ArticleDTO> getAllArticlesByCategory(PageRequestWithCategoryDTO pageRequest) {
+        Pageable pageable = PageRequest.of(pageRequest.getPage(), pageRequest.getSizeOfPage(),
+                Sort.by("postDate").descending());
+        List<Article> allByCategory = articleRepository
+                .findAllByCategory_id(pageRequest.getCategory(),pageable);
         return allByCategory.stream()
                 .filter(Article::isAvailable)
                 .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))

@@ -25,7 +25,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> getAllWithPagination(@Param("available") boolean available,
                                        Pageable pageable);
 
-    List<Article> findAllByCategory_id(long id);
+    List<Article> findAllByCategory_id(long id, Pageable pageable);
 
     @Query(value = "SELECT * FROM sportal.articles" +
             " WHERE date(post_date) = :date " +

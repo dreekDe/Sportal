@@ -1,10 +1,11 @@
 package com.dreekde.sportal.controller;
 
-import com.dreekde.sportal.model.dto.PageRequestDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
+import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.service.ArticleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,9 +49,10 @@ public class ArticleController extends AbstractController {
         return articleService.getAllArticles(pageRequestDTO);
     }
 
-    @GetMapping("/categories/{cid}")
-    public List<ArticleDTO> getAllArticleByCategory(@PathVariable long cid) {
-        return articleService.getAllArticlesByCategory(cid);
+    @GetMapping("/category")
+    public List<ArticleDTO> getAllArticleByCategory(@RequestBody PageRequestWithCategoryDTO
+                                                    pageRequestWithCategoryDTO) {
+        return articleService.getAllArticlesByCategory(pageRequestWithCategoryDTO);
     }
 
     @PostMapping()
