@@ -95,7 +95,7 @@ public class ArticleServiceImpl implements ArticleService {
         Pageable pageable = PageRequest.of(pageRequestByTitle.getPage(),
                 pageRequestByTitle.getSizeOfPage());
         String title = pageRequestByTitle.getTitle();
-        return articleRepository.findAllByTitle(title, pageable).stream()
+        return articleRepository.findAllByTitle(true, title, pageable).stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class))
                 .collect(Collectors.toList());
     }

@@ -37,8 +37,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query(value = "SELECT * FROM sportal.articles " +
             "WHERE title LIKE CONCAT('%',:title,'%') " +
+            "AND is_available = :available " +
             "ORDER BY post_date DESC ",
             countQuery = "SELECT count(*) FROM sportal.articles",
             nativeQuery = true)
-    List<Article> findAllByTitle(@Param("title") String title, Pageable pageable);
+    List<Article> findAllByTitle(@Param("available") boolean available,
+                                 @Param("title") String title,
+                                 Pageable pageable);
 }
