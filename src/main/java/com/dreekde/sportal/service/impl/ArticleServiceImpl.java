@@ -1,5 +1,6 @@
 package com.dreekde.sportal.service.impl;
 
+import com.dreekde.sportal.model.dto.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
@@ -17,8 +18,11 @@ import com.dreekde.sportal.service.CategoryService;
 import com.dreekde.sportal.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +55,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleDTO> getTopFiveDailyArticles() {
-        List<Article> currArticles = articleRepository.topFiveArticles();
+        List<Article> currArticles = articleRepository.topFiveArticles(true, LocalDate.now());
         List<ArticleDTO> topFiveArticles = new LinkedList<>();
         for (Article article : currArticles) {
             topFiveArticles.add(modelMapper.map(article, ArticleDTO.class));
@@ -82,6 +86,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(article);
         return article.getId();
     }
+
     //TODO Pagination
     @Override
     public List<ArticleDTO> getAllArticlesByCategory(long id) {
@@ -92,12 +97,12 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(a -> modelMapper.map(a, ArticleDTO.class))
                 .collect(Collectors.toList());
     }
-    //TODO JPA Pagination
+
     @Override
-    public List<ArticleDTO> getAllArticles() {
-        List<Article> articles = articleRepository.findAll();
+    public List<ArticleDTO> getAllArticles(PageRequestDTO pageRequestDTO) {
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage(), pageRequestDTO.getSizeOfPage());
+        List<Article> articles = articleRepository.getAllWithPagination(true, pageable);
         return articles.stream()
-                .filter(Article::isAvailable)
                 .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());
     }
 

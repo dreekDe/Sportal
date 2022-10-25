@@ -1,5 +1,6 @@
 package com.dreekde.sportal.service;
 
+import com.dreekde.sportal.model.dto.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
@@ -17,7 +18,7 @@ public interface ArticleService {
 
     List<ArticleDTO> getAllArticlesByCategory(long cid);
 
-    List<ArticleDTO> getAllArticles();
+    List<ArticleDTO> getAllArticles(PageRequestDTO pageRequestDTO);
 
     ArticleDetailsDTO getArticleById(long id);
 

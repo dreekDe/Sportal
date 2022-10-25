@@ -1,5 +1,6 @@
 package com.dreekde.sportal.controller;
 
+import com.dreekde.sportal.model.dto.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
@@ -43,8 +44,8 @@ public class ArticleController extends AbstractController {
     }
 
     @GetMapping("/all")
-    public List<ArticleDTO> getAllArticles() {
-        return articleService.getAllArticles();
+    public List<ArticleDTO> getAllArticles(@RequestBody PageRequestDTO pageRequestDTO) {
+        return articleService.getAllArticles(pageRequestDTO);
     }
 
     @GetMapping("/categories/{cid}")
@@ -53,7 +54,7 @@ public class ArticleController extends AbstractController {
     }
 
     @PostMapping()
-    @ResponseStatus(code = HttpStatus.OK)
+    @ResponseStatus(code = HttpStatus.CREATED)
     public ArticleDTO addArticle(@RequestBody ArticleCreateDTO articleCreateDTO,
                                  HttpSession session) {
         validatePermission(session);
