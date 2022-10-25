@@ -1,5 +1,6 @@
 package com.dreekde.sportal.service.impl;
 
+import com.dreekde.sportal.model.dto.page.PageRequestByTitle;
 import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
@@ -87,6 +88,16 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAvailable(false);
         articleRepository.save(article);
         return article.getId();
+    }
+
+    @Override
+    public List<ArticleDTO> getAllArticlesByTitle(PageRequestByTitle pageRequestByTitle) {
+        Pageable pageable = PageRequest.of(pageRequestByTitle.getPage(),
+                pageRequestByTitle.getSizeOfPage());
+        String title = pageRequestByTitle.getTitle();
+        return articleRepository.findAllByTitle(title, pageable).stream()
+                .map(a -> modelMapper.map(a, ArticleDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.dreekde.sportal.controller;
 
+import com.dreekde.sportal.model.dto.page.PageRequestByTitle;
 import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
@@ -32,6 +33,11 @@ public class ArticleController extends AbstractController {
 
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
+    }
+    @GetMapping("/find")
+    public List<ArticleDTO> getArticlesByTitle(@RequestBody PageRequestByTitle
+                                                           pageRequestByTitle) {
+        return articleService.getAllArticlesByTitle(pageRequestByTitle);
     }
 
     @GetMapping("/topFive")

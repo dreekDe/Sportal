@@ -32,5 +32,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "AND is_available = :available " +
             "ORDER BY views DESC LIMIT 5",
             nativeQuery = true)
-    List<Article> topFiveArticles(@Param("available") boolean available, @Param("date") LocalDate date);
+    List<Article> topFiveArticles(@Param("available") boolean available,
+                                  @Param("date") LocalDate date);
+
+    @Query(value = "SELECT * FROM sportal.articles " +
+            "WHERE title LIKE CONCAT('%',:title,'%') " +
+            "ORDER BY post_date DESC ",
+            countQuery = "SELECT count(*) FROM sportal.articles",
+            nativeQuery = true)
+    List<Article> findAllByTitle(@Param("title") String title, Pageable pageable);
 }
