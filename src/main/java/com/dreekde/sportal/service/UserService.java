@@ -1,6 +1,7 @@
 package com.dreekde.sportal.service;
 
 import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
+import com.dreekde.sportal.model.dto.user.UserEditDTO;
 import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
@@ -26,4 +27,6 @@ public interface UserService {
     UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO);
 
     UserWithoutPasswordDTO register(UserRegisterDTO userRegisterDTO);
+
+    long editUser(UserEditDTO userEditDTO);
 }

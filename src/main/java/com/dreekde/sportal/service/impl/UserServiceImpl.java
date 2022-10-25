@@ -1,6 +1,7 @@
 package com.dreekde.sportal.service.impl;
 
 import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
+import com.dreekde.sportal.model.dto.user.UserEditDTO;
 import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
@@ -50,17 +51,30 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    @Override
+    public long editUser(UserEditDTO userEditDTO) {
+        String password = userEditDTO.getPassword().trim();
+        long userId = userEditDTO.getId();
+        validationUserCredential(password, userId);
+        validationNames(userEditDTO.getUsername(),
+                userEditDTO.getFirstName(),
+                userEditDTO.getLastName());
+        validationEmail(userEditDTO.getEmail());
+        validationAge(userEditDTO.getDateOfBirth());
+        User user = modelMapper.map(userEditDTO, User.class);
+        user.setPassword(bCryptPasswordEncoder.encode(password));
+        userRepository.save(user);
+        return user.getId();
+    }
+
+    @Override
     public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO) {
+        if (!isValidPassword(userEditPasswordDTO.getNewPassword().trim())) {
+            throw new BadRequestException(INVALID_PASSWORD);
+        }
         String password = userEditPasswordDTO.getOldPassword().trim();
-        if (!isValidPassword(password)
-                || (!isValidPassword(userEditPasswordDTO.getNewPassword()))) {
-            throw new BadRequestException(WRONG_CREDENTIAL);
-        }
-        User user = userRepository.findById(userEditPasswordDTO.getId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
-        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            throw new UnauthorizedException(WRONG_CREDENTIAL);
-        }
+        long userId = userEditPasswordDTO.getId();
+        User user = validationUserCredential(password, userId);
         matchingPasswords(userEditPasswordDTO.getNewPassword().trim(),
                 userEditPasswordDTO.getConfirmPassword().trim());
         user.setPassword(bCryptPasswordEncoder.encode(userEditPasswordDTO.getNewPassword()));
@@ -68,6 +82,7 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Override
     public long deleteUser(UserDeleteDTO userDeleteDTO) {
         String password = userDeleteDTO.getPassword().trim();
         if (!isValidPassword(password)) {
@@ -93,6 +108,7 @@ public class UserServiceImpl implements UserService {
         return user.isAdmin();
     }
 
+    @Override
     public List<UserWithoutPasswordDTO> getAllUsers() {
         List<User> allUsers = userRepository.findAll();
         return allUsers.stream().filter(User::isActive)
@@ -100,12 +116,14 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public UserWithoutPasswordDTO getUserById(long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Override
     public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
         String username = userLoginDTO.getUsername().trim();
         String password = userLoginDTO.getPassword().trim();
@@ -120,6 +138,7 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Override
     public UserWithoutPasswordDTO register(UserRegisterDTO userRegisterDTO) {
         validationUserRegisterDTO(userRegisterDTO);
         User user = modelMapper.map(userRegisterDTO, User.class);
@@ -135,24 +154,36 @@ public class UserServiceImpl implements UserService {
     private void validationUserRegisterDTO(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername().trim();
         String password = userRegisterDTO.getPassword().trim();
-        if (!isValidName(username)
-                || !isValidName(userRegisterDTO.getFirstName())
-                || !isValidName(userRegisterDTO.getLastName())) {
-            throw new BadRequestException(INVALID_DATA);
-        }
+        validationNames(username,
+                userRegisterDTO.getFirstName(),
+                userRegisterDTO.getLastName());
         if (!isValidPassword(password)) {
             throw new BadRequestException(INVALID_PASSWORD);
         }
         matchingPasswords(userRegisterDTO.getConfirmPassword().trim(), password);
-        if (!isValidEmail(userRegisterDTO.getEmail().trim())) {
-            throw new BadRequestException(INVALID_EMAIL);
-        }
-        if (!isValidAge(userRegisterDTO.getDateOfBirth())) {
-            throw new BadRequestException(INVALID_AGE);
-        }
+        validationEmail(userRegisterDTO.getEmail().trim());
+        validationAge(userRegisterDTO.getDateOfBirth());
         if (userRepository.existsByUsername(username) ||
                 userRepository.existsByEmail(userRegisterDTO.getEmail().trim())) {
             throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+        }
+    }
+
+    private User validationUserCredential(String password, long userId) {
+        if (isValidPassword(password)) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+            if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+                throw new UnauthorizedException(WRONG_CREDENTIAL);
+            }
+            return user;
+        }
+        throw new BadRequestException(WRONG_CREDENTIAL);
+    }
+
+    private void validationNames(String username, String firstName, String lastName) {
+        if (!isValidName(username) || !isValidName(firstName) || !isValidName(lastName)) {
+            throw new BadRequestException(INVALID_DATA);
         }
     }
 
@@ -162,13 +193,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private boolean isValidAge(LocalDate dateOfBirth) {
-        return LocalDate.now().getYear() - dateOfBirth.getYear() >= 18;
+    private void validationAge(LocalDate dateOfBirth) {
+        if (LocalDate.now().getYear() - dateOfBirth.getYear() < 18) {
+            throw new BadRequestException(INVALID_AGE);
+        }
     }
 
-    private boolean isValidEmail(String email) {
+    private void validationEmail(String email) {
         String regex = "^[\\w]{2,}@[\\w]{1,}.[\\w]{2,3}$";
-        return Pattern.compile(regex).matcher(email).matches();
+        if (!Pattern.compile(regex).matcher(email).matches()) {
+            throw new BadRequestException(INVALID_EMAIL);
+        }
     }
 
     private boolean isValidPassword(String password) {

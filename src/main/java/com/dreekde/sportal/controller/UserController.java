@@ -1,6 +1,7 @@
 package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.user.UserDeleteDTO;
+import com.dreekde.sportal.model.dto.user.UserEditDTO;
 import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
@@ -30,13 +31,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController extends AbstractController {
-
-    private static final String WRONG_CREDENTIAL = "Wrong credential!";
-    private static final String ALREADY_LOGGED = "You already logged!";
-    private static final String LOGOUT = "Logout success!";
-    private static final String NOT_LOGGED = "You are not logged!";
-    private static final String NOT_ALLOWED = "Not allowed operation!";
-    private static final String UNAUTHORIZED = "Not authorized!";
 
     private final UserServiceImpl userService;
 
@@ -100,14 +94,16 @@ public class UserController extends AbstractController {
     @PutMapping("/pass")
     public long changePassword(@RequestBody UserEditPasswordDTO userEditPasswordDTO,
                                HttpServletRequest request) {
-        long userId = getLoggedUserId(request.getSession());
-        if (userId <= 0) {
-            throw new BadRequestException(NOT_LOGGED);
-        }
-        if (userId != userEditPasswordDTO.getId()) {
-            throw new MethodNotAllowedException(NOT_ALLOWED);
-        }
-        userId = userService.changePassword(userEditPasswordDTO).getId();
+        validationEditUser(request, userEditPasswordDTO.getId());
+        long userId = userService.changePassword(userEditPasswordDTO).getId();
+        request.getSession().invalidate();
+        return userId;
+    }
+
+    @PutMapping("/edit")
+    public long editUser(@RequestBody UserEditDTO userEditDTO, HttpServletRequest request) {
+        validationEditUser(request, userEditDTO.getId());
+        long userId = userService.editUser(userEditDTO);
         request.getSession().invalidate();
         return userId;
     }

@@ -21,11 +21,15 @@ import java.time.LocalDateTime;
  */
 public abstract class AbstractController {
 
-    private static final String UNAUTHORIZED = "Not authorized!";
     protected static final String LOGGED = "LOGGED";
     protected static final String USER_ID = "USER_ID";
-    private static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
-    private static final String NOT_LOGGED = "You are not logged!";
+    protected static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
+    protected static final String NOT_LOGGED = "You are not logged!";
+    protected static final String WRONG_CREDENTIAL = "Wrong credential!";
+    protected static final String ALREADY_LOGGED = "You already logged!";
+    protected static final String LOGOUT = "Logout success!";
+    protected static final String NOT_ALLOWED = "Not allowed operation!";
+    protected static final String UNAUTHORIZED = "Not authorized!";
 
     @Autowired
     private UserService userService;
@@ -73,6 +77,16 @@ public abstract class AbstractController {
         exceptionDTO.setDateTime(LocalDateTime.now());
         exceptionDTO.setMessage(message.getMessage());
         return exceptionDTO;
+    }
+
+    protected void validationEditUser(HttpServletRequest request, long userEditId) {
+        long userId = getLoggedUserId(request.getSession());
+        if (userId <= 0) {
+            throw new BadRequestException(NOT_LOGGED);
+        }
+        if (userId != userEditId) {
+            throw new MethodNotAllowedException(NOT_ALLOWED);
+        }
     }
 
     protected void loginUser(HttpServletRequest request, long id) {
