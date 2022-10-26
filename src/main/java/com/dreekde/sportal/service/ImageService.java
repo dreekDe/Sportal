@@ -8,5 +8,9 @@ import com.dreekde.sportal.model.entities.Article;
 public interface ImageService {
 
     long createImage(Article article, String canonicalPath);
+
+    long deleteImage(long id);
+
+    long deleteAllImages(long id);
 }
 

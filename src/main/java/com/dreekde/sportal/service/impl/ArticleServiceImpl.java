@@ -46,6 +46,7 @@ public class ArticleServiceImpl implements ArticleService {
     private static final String FILE_EXIST = "The file already exist!";
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
+    private static final String NOT_UPLOADED = "Upload failed!";
 
     private final CategoryService categoryService;
     private final ModelMapper modelMapper;
@@ -66,7 +67,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleDTO> getTopFiveDailyArticles() {
-        List<Article> currArticles = articleRepository.topFiveArticles(true, LocalDate.now());
+        List<Article> currArticles = articleRepository
+                .topFiveArticles(true, LocalDate.now());
         List<ArticleDTO> topFiveArticles = new LinkedList<>();
         for (Article article : currArticles) {
             topFiveArticles.add(modelMapper.map(article, ArticleDTO.class));
@@ -113,7 +115,7 @@ public class ArticleServiceImpl implements ArticleService {
         Pageable pageable = PageRequest.of(pageRequest.getPage(), pageRequest.getSizeOfPage(),
                 Sort.by("postDate").descending());
         List<Article> allByCategory = articleRepository
-                .findAllByCategory_id(pageRequest.getCategory(),pageable);
+                .findAllByCategory_id(pageRequest.getCategory(), pageable);
         return allByCategory.stream()
                 .filter(Article::isAvailable)
                 .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))
@@ -165,7 +167,7 @@ public class ArticleServiceImpl implements ArticleService {
             String canonicalPath = uploadFile.getCanonicalPath();
             return imageService.createImage(article, canonicalPath);
         } catch (IOException e) {
-            throw new BadRequestException(e.getMessage(), e);
+            throw new BadRequestException(NOT_UPLOADED, e);
         }
     }
 
