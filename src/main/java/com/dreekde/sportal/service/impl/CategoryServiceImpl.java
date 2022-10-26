@@ -79,6 +79,12 @@ public class CategoryServiceImpl implements CategoryService {
         return category.getId();
     }
 
+    @Override
+    public Category getCategory(long id) {
+        return categoryRepository.getByIdAndAvailable(true, id)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
+    }
+
     private void validateInputString(String string) {
         if (string == null || string.trim().isEmpty()) {
             throw new BadRequestException(CategoryServiceImpl.INVALID_CATEGORY_NAME);
