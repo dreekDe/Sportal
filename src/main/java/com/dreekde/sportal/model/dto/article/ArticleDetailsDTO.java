@@ -1,5 +1,6 @@
 package com.dreekde.sportal.model.dto.article;
 
+import com.dreekde.sportal.model.dto.image.ImageDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,6 @@ public class ArticleDetailsDTO {
     private String text;
     private int views;
     private LocalDateTime postDate;
-    private List<String> images;
+    private List<ImageDTO> images;
 
 }

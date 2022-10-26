@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -134,9 +135,14 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleDetailsDTO getArticleById(long id) {
         Article article = getArticleId(id);
+        if (!article.isAvailable()) {
+            throw new NotFoundException(ARTICLE_DOES_NOT_EXIST);
+        }
         article.setViews(article.getViews() + 1);
         articleRepository.save(article);
-        return modelMapper.map(article, ArticleDetailsDTO.class);
+        ArticleDetailsDTO articleDetailsDTO = modelMapper.map(article, ArticleDetailsDTO.class);
+        articleDetailsDTO.setImages(imageService.getAllImagesByArticleId(id));
+        return articleDetailsDTO;
     }
 
     @Override
@@ -153,19 +159,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public long uploadArticleImage(long aid, MultipartFile file) {
+    public String uploadArticleImage(long aid, MultipartFile file) {
         try {
             Article article = getArticleId(aid);
             String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-            String name = "uploads" + File.separator + System.nanoTime() + "." + ext;
-            File uploadFile = new File(name);
+            Path path = Path.of("uploads");
+            String name = System.nanoTime() + "." + ext;
+            File uploadFile = new File(String.valueOf(path), name);
             if (!uploadFile.exists()) {
                 Files.copy(file.getInputStream(), uploadFile.toPath());
             } else {
                 throw new BadRequestException(FILE_EXIST);
             }
-            String canonicalPath = uploadFile.getCanonicalPath();
-            return imageService.createImage(article, canonicalPath);
+            return imageService.uploadImage(article, name);
         } catch (IOException e) {
             throw new BadRequestException(NOT_UPLOADED, e);
         }

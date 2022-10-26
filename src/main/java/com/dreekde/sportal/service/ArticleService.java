@@ -29,5 +29,5 @@ public interface ArticleService {
 
     List<ArticleDTO> getAllArticlesByTitle(PageRequestByTitle pageRequestByTitle);
 
-    long uploadArticleImage(long aid, MultipartFile file);
+    String uploadArticleImage(long aid, MultipartFile file);
 }

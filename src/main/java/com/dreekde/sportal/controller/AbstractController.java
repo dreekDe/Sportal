@@ -111,7 +111,7 @@ public abstract class AbstractController {
                 && request.getRemoteAddr().equals(session.getAttribute(REMOTE_ADDRESS));
     }
 
-    protected void validatePermission(HttpSession session) {
+    protected void validateAdmin(HttpSession session) {
         long loggedUserId = getLoggedUserId(session);
         if (loggedUserId > 0) {
             if (!isAdmin(loggedUserId)) {
