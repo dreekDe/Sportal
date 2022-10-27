@@ -57,20 +57,23 @@ public class UserServiceImpl implements UserService {
         String username = userEditDTO.getUsername().trim();
         String email = userEditDTO.getEmail().trim();
         long userId = userEditDTO.getId();
-        validationUserCredential(password, userId);
+        User user = validationUserCredential(password, userId);
         validationNames(username, userEditDTO.getFirstName(), userEditDTO.getLastName());
-        if (userRepository.existsByUsernameAndIdNot(username, userId)) {
-            throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
-        }
-        if (userRepository.existsByEmailAndIdNot(email, userId)) {
-            throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
-        }
         validationEmail(email);
         validationAge(userEditDTO.getDateOfBirth());
-        User user = modelMapper.map(userEditDTO, User.class);
+        if (!user.getUsername().equals(username)) {
+            if (userRepository.existsByUsernameAndIdNot(username, userId)) {
+                throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+            }
+        }
+        if (!user.getEmail().equals(email)) {
+            if (userRepository.existsByEmailAndIdNot(email, userId)) {
+                throw new BadRequestException(USERNAME_OR_EMAIL_ALREADY_EXIST);
+            }
+        }
+        user = modelMapper.map(userEditDTO, User.class);
         user.setPassword(bCryptPasswordEncoder.encode(password));
-        userRepository.save(user);
-        return user.getId();
+        return userRepository.save(user).getId();
     }
 
     @Override
