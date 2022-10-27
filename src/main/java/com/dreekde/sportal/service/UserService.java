@@ -6,6 +6,7 @@ import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
+import com.dreekde.sportal.model.entities.User;
 
 import java.util.List;
 
@@ -13,6 +14,8 @@ import java.util.List;
  * @author Desislava Tencheva
  */
 public interface UserService {
+
+    User getUser(long id);
 
     UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO);
 

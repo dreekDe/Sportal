@@ -7,9 +7,7 @@ import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
-import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Article;
-import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.repositories.ArticleRepository;
@@ -83,7 +81,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
         article.setCategory(categoryService.getCategory(articleCreateDTO.getCategory()));
-        article.setAuthor(getAuthor(articleCreateDTO.getAuthor()));
+        article.setAuthor(userService.getUser(articleCreateDTO.getAuthor()));
         article.setAvailable(true);
         article.setImages(new LinkedList<>());//todo
         articleRepository.save(article);
@@ -149,7 +147,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
         article.setCategory(categoryService.getCategory(articleEditDTO.getCategory()));
-        article.setAuthor(getAuthor(articleEditDTO.getAuthor()));
+        article.setAuthor(userService.getUser(articleEditDTO.getAuthor()));
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
     }
@@ -177,11 +175,6 @@ public class ArticleServiceImpl implements ArticleService {
     public Article getArticleById(long id) {
         return articleRepository.getArticleById(true, id).
                 orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
-    }
-
-    private User getAuthor(long id) {
-        UserWithoutPasswordDTO userDTO = userService.getUserById(id);
-        return modelMapper.map(userDTO, User.class);
     }
 
     private void validateInputString(String string) {

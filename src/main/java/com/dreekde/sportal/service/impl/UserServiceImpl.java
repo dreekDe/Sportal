@@ -151,6 +151,12 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Override
+    public User getUser(long id) {
+        return userRepository.getUserById(true, id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+    }
+
     private void validationUserRegisterDTO(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername().trim();
         String password = userRegisterDTO.getPassword().trim();
