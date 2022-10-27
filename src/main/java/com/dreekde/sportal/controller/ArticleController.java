@@ -50,7 +50,7 @@ public class ArticleController extends AbstractController {
 
     @GetMapping("/{id}")
     public ArticleDetailsDTO getArticleDetails(@PathVariable long id) {
-        return articleService.getArticleById(id);
+        return articleService.getArticleDetailsById(id);
     }
 
     @GetMapping()

@@ -37,7 +37,7 @@ public class Article {
     private String text;
     @Column(nullable = false)
     private int views;
-    @Column
+    @Column(nullable = false)
     private LocalDateTime postDate;
     @OneToOne
     @JoinColumn(referencedColumnName = "id", nullable = false)

@@ -7,11 +7,14 @@ import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
 import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
+import com.dreekde.sportal.model.entities.Article;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface ArticleService {
+
+    Article getArticleById(long id);
 
     List<ArticleDTO> getTopFiveDailyArticles();
 
@@ -23,7 +26,7 @@ public interface ArticleService {
 
     List<ArticleDTO> getAllArticles(PageRequestDTO pageRequestDTO);
 
-    ArticleDetailsDTO getArticleById(long id);
+    ArticleDetailsDTO getArticleDetailsById(long id);
 
     ArticleDTO editArticle(ArticleEditDTO articleEditDTO);
 

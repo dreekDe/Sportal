@@ -16,6 +16,7 @@ public class ArticleDetailsDTO {
     private String title;
     private String text;
     private int views;
+    //private int comments;//todo
     private LocalDateTime postDate;
     private List<ImageDTO> images;
 

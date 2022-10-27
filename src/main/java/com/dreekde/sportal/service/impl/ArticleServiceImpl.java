@@ -6,11 +6,9 @@ import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
-import com.dreekde.sportal.model.dto.category.CategoryDTO;
 import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Article;
-import com.dreekde.sportal.model.entities.Category;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
@@ -84,7 +82,7 @@ public class ArticleServiceImpl implements ArticleService {
         Article article = modelMapper.map(articleCreateDTO, Article.class);
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
-        article.setCategory(getCategory(articleCreateDTO.getCategory()));
+        article.setCategory(categoryService.getCategory(articleCreateDTO.getCategory()));
         article.setAuthor(getAuthor(articleCreateDTO.getAuthor()));
         article.setAvailable(true);
         article.setImages(new LinkedList<>());//todo
@@ -133,11 +131,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleDetailsDTO getArticleById(long id) {
-        Article article = getArticleId(id);
-        if (!article.isAvailable()) {
-            throw new NotFoundException(ARTICLE_DOES_NOT_EXIST);
-        }
+    public ArticleDetailsDTO getArticleDetailsById(long id) {
+        Article article = getArticleById(id);
         article.setViews(article.getViews() + 1);
         articleRepository.save(article);
         ArticleDetailsDTO articleDetailsDTO = modelMapper.map(article, ArticleDetailsDTO.class);
@@ -149,10 +144,11 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDTO editArticle(ArticleEditDTO articleEditDTO) {
         validateInputString(articleEditDTO.getTitle());
         validateInputString(articleEditDTO.getText());
-        Article article = getArticleId(articleEditDTO.getId());
+        Article article = articleRepository.findById(articleEditDTO.getId())
+                .orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
-        article.setCategory(getCategory(articleEditDTO.getCategory()));
+        article.setCategory(categoryService.getCategory(articleEditDTO.getCategory()));
         article.setAuthor(getAuthor(articleEditDTO.getAuthor()));
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
@@ -161,7 +157,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public String uploadArticleImage(long aid, MultipartFile file) {
         try {
-            Article article = getArticleId(aid);
+            Article article = getArticleById(aid);
             String ext = FilenameUtils.getExtension(file.getOriginalFilename());
             Path path = Path.of("uploads");
             String name = System.nanoTime() + "." + ext;
@@ -177,19 +173,15 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    private Article getArticleId(long id) {
-        return articleRepository.findById(id).
+    @Override
+    public Article getArticleById(long id) {
+        return articleRepository.getArticleById(true, id).
                 orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
     }
 
     private User getAuthor(long id) {
         UserWithoutPasswordDTO userDTO = userService.getUserById(id);
         return modelMapper.map(userDTO, User.class);
-    }
-
-    private Category getCategory(long id) {
-        CategoryDTO categoryDTO = categoryService.getCategoryById(id);
-        return modelMapper.map(categoryDTO, Category.class);
     }
 
     private void validateInputString(String string) {

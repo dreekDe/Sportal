@@ -1,7 +1,6 @@
 package com.dreekde.sportal.model.repositories;
 
 import com.dreekde.sportal.model.entities.Article;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Desislava Tencheva
@@ -44,4 +44,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findAllByTitle(@Param("available") boolean available,
                                  @Param("title") String title,
                                  Pageable pageable);
+
+    @Query(value = "SELECT * FROM sportal.articles" +
+            " WHERE id = :id " +
+            "AND is_available = :available",
+            nativeQuery = true)
+    Optional<Article> getArticleById(@Param("available") boolean available,
+                                     @Param("id") long id);
 }
