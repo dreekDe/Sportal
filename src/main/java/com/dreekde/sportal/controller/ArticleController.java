@@ -59,8 +59,8 @@ public class ArticleController extends AbstractController {
     }
 
     @GetMapping("/category")
-    public List<ArticleDTO> getAllArticleByCategory(@RequestBody PageRequestWithCategoryDTO
-                                                            pageRequestWithCategoryDTO) {
+    public List<ArticleDTO> getAllArticlesByCategory(@RequestBody PageRequestWithCategoryDTO
+                                                             pageRequestWithCategoryDTO) {
         return articleService.getAllArticlesByCategory(pageRequestWithCategoryDTO);
     }
 
