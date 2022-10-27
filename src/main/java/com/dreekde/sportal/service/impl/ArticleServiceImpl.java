@@ -99,6 +99,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleDTO> getAllArticlesByTitle(PageRequestByTitle pageRequestByTitle) {
+        validateInputString(pageRequestByTitle.getTitle());
         Pageable pageable = PageRequest.of(pageRequestByTitle.getPage(),
                 pageRequestByTitle.getSizeOfPage());
         String title = pageRequestByTitle.getTitle();
