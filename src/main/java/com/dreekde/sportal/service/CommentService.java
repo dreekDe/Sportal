@@ -10,4 +10,5 @@ public interface CommentService {
 
     CommentDTO createNewComment(CommentCreateDTO commentCreateDTO);
 
+    long deleteComment(long id, long userId);
 }
