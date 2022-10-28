@@ -114,13 +114,9 @@ public abstract class AbstractController {
     protected void validateAdmin(HttpSession session) {
         long loggedUserId = getLoggedUserId(session);
         if (loggedUserId > 0) {
-            if (!isAdmin(loggedUserId)) {
+            if (!userService.userIsAdmin(loggedUserId)) {
                 throw new AuthenticationException(UNAUTHORIZED);
             }
         }
-    }
-
-    protected boolean isAdmin(long id) {
-        return userService.userIsAdmin(id);
     }
 }
