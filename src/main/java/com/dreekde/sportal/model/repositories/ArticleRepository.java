@@ -30,6 +30,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query(value = "SELECT * FROM sportal.articles" +
             " WHERE date(post_date) = :date " +
             "AND is_available = :available " +
+            "AND views > 0 " +
             "ORDER BY views DESC , post_date DESC LIMIT 5",
             nativeQuery = true)
     List<Article> topFiveArticles(@Param("available") boolean available,
