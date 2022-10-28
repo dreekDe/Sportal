@@ -1,12 +1,9 @@
 package com.dreekde.sportal.controller;
 
-import com.dreekde.sportal.model.dto.page.PageRequestByTitle;
-import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
-import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,10 +34,11 @@ public class ArticleController extends AbstractController {
         this.articleService = articleService;
     }
 
-    @GetMapping("/find")
-    public List<ArticleDTO> getArticlesByTitle(@RequestBody PageRequestByTitle
-                                                       pageRequestByTitle) {
-        return articleService.getAllArticlesByTitle(pageRequestByTitle);
+    @GetMapping("/find/{title}/{page}/{pageSize}")
+    public List<ArticleDTO> getArticlesByTitle(@PathVariable String title,
+                                               @PathVariable int page,
+                                               @PathVariable int pageSize) {
+        return articleService.getAllArticlesByTitle(title, page, pageSize);
     }
 
     @GetMapping("/topFive")
@@ -53,15 +51,17 @@ public class ArticleController extends AbstractController {
         return articleService.getArticleDetailsById(id);
     }
 
-    @GetMapping()
-    public List<ArticleDTO> getAllArticles(@RequestBody PageRequestDTO pageRequestDTO) {
-        return articleService.getAllArticles(pageRequestDTO);
+    @GetMapping("/{page}/{pageSize}")
+    public List<ArticleDTO> getAllArticles(@PathVariable int page,
+                                           @PathVariable int pageSize) {
+        return articleService.getAllArticles(page, pageSize);
     }
 
-    @GetMapping("/category")
-    public List<ArticleDTO> getAllArticlesByCategory(@RequestBody PageRequestWithCategoryDTO
-                                                             pageRequestWithCategoryDTO) {
-        return articleService.getAllArticlesByCategory(pageRequestWithCategoryDTO);
+    @GetMapping("/category/{category}/{page}/{pageSize}")
+    public List<ArticleDTO> getAllArticlesByCategory(@PathVariable String category,
+                                                     @PathVariable int page,
+                                                     @PathVariable int pageSize) {
+        return articleService.getAllArticlesByCategory(category, page, pageSize);
     }
 
     @PostMapping()
