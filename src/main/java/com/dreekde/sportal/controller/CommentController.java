@@ -2,20 +2,18 @@ package com.dreekde.sportal.controller;
 
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
-import com.dreekde.sportal.model.dto.comment.CommentDeleteDTO;
-import com.dreekde.sportal.model.dto.image.ImageDeleteDTO;
-import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * @author Desislava Tencheva
@@ -29,6 +27,11 @@ public class CommentController extends AbstractController {
     @Autowired
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
+    }
+
+    @GetMapping("/{aid}")
+    public List<CommentDTO> getAllCommentsByArticleId(@PathVariable long aid){
+        return commentService.getAllCommentsByArticle(aid);
     }
 
     @PostMapping()

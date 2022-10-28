@@ -13,10 +13,11 @@ import com.dreekde.sportal.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  * @author Desislava Tencheva
@@ -41,6 +42,14 @@ public class CommentServiceImpl implements CommentService {
         this.articleService = articleService;
         this.userService = userService;
         this.commentRepository = commentRepository;
+    }
+
+    @Override
+    public List<CommentDTO> getAllCommentsByArticle(long id) {
+        List<Comment> comments = articleService.getArticleById(id).getComments();
+        return comments.stream()
+                .map(comment -> modelMapper.map(comment, CommentDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
