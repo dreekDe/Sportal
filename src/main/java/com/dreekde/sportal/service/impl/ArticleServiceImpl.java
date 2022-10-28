@@ -1,12 +1,9 @@
 package com.dreekde.sportal.service.impl;
 
-import com.dreekde.sportal.model.dto.page.PageRequestByTitle;
-import com.dreekde.sportal.model.dto.page.PageRequestDTO;
 import com.dreekde.sportal.model.dto.article.ArticleCreateDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDTO;
 import com.dreekde.sportal.model.dto.article.ArticleDetailsDTO;
 import com.dreekde.sportal.model.dto.article.ArticleEditDTO;
-import com.dreekde.sportal.model.dto.page.PageRequestWithCategoryDTO;
 import com.dreekde.sportal.model.entities.Article;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
@@ -20,7 +17,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -98,22 +94,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleDTO> getAllArticlesByTitle(PageRequestByTitle pageRequestByTitle) {
-        validateInputString(pageRequestByTitle.getTitle());
-        Pageable pageable = PageRequest.of(pageRequestByTitle.getPage(),
-                pageRequestByTitle.getSizeOfPage());
-        String title = pageRequestByTitle.getTitle();
+    public List<ArticleDTO> getAllArticlesByTitle(String title, int page, int pageSize) {
+        validateInputString(title);
+        Pageable pageable = PageRequest.of(page, pageSize);
         return articleRepository.findAllByTitle(true, title, pageable).stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ArticleDTO> getAllArticlesByCategory(PageRequestWithCategoryDTO pageRequest) {
-        Pageable pageable = PageRequest.of(pageRequest.getPage(), pageRequest.getSizeOfPage(),
-                Sort.by("postDate").descending());
+    public List<ArticleDTO> getAllArticlesByCategory(String category, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
         List<Article> allByCategory = articleRepository
-                .findAllByCategory_id(pageRequest.getCategory(), pageable);
+                .findAllByCategory_nameOrderByPostDateDesc(category, pageable);
         return allByCategory.stream()
                 .filter(Article::isAvailable)
                 .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))
@@ -122,8 +115,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleDTO> getAllArticles(PageRequestDTO pageRequestDTO) {
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage(), pageRequestDTO.getSizeOfPage());
+    public List<ArticleDTO> getAllArticles(int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
         List<Article> articles = articleRepository.getAllWithPagination(true, pageable);
         return articles.stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());

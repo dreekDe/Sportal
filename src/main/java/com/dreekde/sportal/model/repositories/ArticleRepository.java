@@ -25,12 +25,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> getAllWithPagination(@Param("available") boolean available,
                                        Pageable pageable);
 
-    List<Article> findAllByCategory_id(long id, Pageable pageable);
+    List<Article> findAllByCategory_nameOrderByPostDateDesc(String name, Pageable pageable);
 
     @Query(value = "SELECT * FROM sportal.articles" +
             " WHERE date(post_date) = :date " +
             "AND is_available = :available " +
-            "ORDER BY views DESC LIMIT 5",
+            "ORDER BY views DESC , post_date DESC LIMIT 5",
             nativeQuery = true)
     List<Article> topFiveArticles(@Param("available") boolean available,
                                   @Param("date") LocalDate date);
