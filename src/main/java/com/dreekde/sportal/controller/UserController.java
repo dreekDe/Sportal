@@ -79,7 +79,7 @@ public class UserController extends AbstractController {
     public long deleteUser(@RequestBody UserDeleteDTO userDeleteDTO,
                            HttpServletRequest request) {
         long userId = getLoggedUserId(request.getSession());
-        if (userId == userDeleteDTO.getId() || isAdmin(userId)) {
+        if (userId == userDeleteDTO.getId() || userService.userIsAdmin(userId)) {
             return userService.deleteUser(userDeleteDTO);
         }
         if (userId != userDeleteDTO.getId()) {
