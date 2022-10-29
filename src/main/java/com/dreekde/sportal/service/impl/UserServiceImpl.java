@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private static final String INVALID_AGE = "Invalid registration age";
     private static final String USERNAME_OR_EMAIL_ALREADY_EXIST = "Username or email already exist!";
     private static final String INVALID_EMAIL = "Invalid email!";
+    private static final String INVALID_USER = "Invalid user!";
 
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
@@ -162,6 +163,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUser(long id) {
+        if (id <= 0){
+            throw new BadRequestException(INVALID_USER);
+        }
         return userRepository.getUserById(true, id)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
     }
