@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -40,6 +41,8 @@ public class ArticleServiceImpl implements ArticleService {
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
     private static final String NOT_UPLOADED = "Upload failed!";
+    private static final String FILE_EMPTY = "Not attached file!";
+    private static final String INVALID_ARTICLE = "Invalid article!";
 
     private final CategoryService categoryService;
     private final ModelMapper modelMapper;
@@ -69,8 +72,9 @@ public class ArticleServiceImpl implements ArticleService {
         return topFiveArticles;
     }
 
+    @Transactional
     @Override
-    public ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO) {
+    public ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO, MultipartFile file) {
         validateInputString(articleCreateDTO.getTitle());
         validateInputString(articleCreateDTO.getText());
         Article article = modelMapper.map(articleCreateDTO, Article.class);
@@ -79,11 +83,12 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCategory(categoryService.getCategory(articleCreateDTO.getCategory()));
         article.setAuthor(userService.getUser(articleCreateDTO.getAuthor()));
         article.setAvailable(true);
-        article.setImages(new LinkedList<>());//todo
-        articleRepository.save(article);
+        article = articleRepository.save(article);
+        uploadArticleImage(article.getId(), file);
         return modelMapper.map(article, ArticleDTO.class);
     }
 
+    @Transactional
     @Override
     public long deleteArticle(long id) {
         Article article = articleRepository.findById(id).
@@ -122,6 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ArticleDetailsDTO getArticleDetailsById(long id) {
         Article article = getArticleById(id);
@@ -132,12 +138,14 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDetailsDTO;
     }
 
+    @Transactional
     @Override
     public ArticleDTO editArticle(ArticleEditDTO articleEditDTO) {
         validateInputString(articleEditDTO.getTitle());
         validateInputString(articleEditDTO.getText());
         Article article = articleRepository.findById(articleEditDTO.getId())
                 .orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
+        article.setAvailable(true);
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
         article.setCategory(categoryService.getCategory(articleEditDTO.getCategory()));
@@ -146,8 +154,12 @@ public class ArticleServiceImpl implements ArticleService {
         return modelMapper.map(article, ArticleDTO.class);
     }
 
+    @Transactional
     @Override
     public String uploadArticleImage(long aid, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException(FILE_EMPTY);
+        }
         try {
             Article article = getArticleById(aid);
             String ext = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -167,6 +179,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Article getArticleById(long id) {
+        if (id <= 0) {
+            throw new BadRequestException(INVALID_ARTICLE);
+        }
         return articleRepository.getArticleById(true, id).
                 orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
     }

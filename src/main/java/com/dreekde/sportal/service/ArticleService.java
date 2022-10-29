@@ -15,7 +15,7 @@ public interface ArticleService {
 
     List<ArticleDTO> getTopFiveDailyArticles();
 
-    ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO);
+    ArticleDTO createNewArticle(ArticleCreateDTO articleCreateDTO, MultipartFile file);
 
     long deleteArticle(long id);
 

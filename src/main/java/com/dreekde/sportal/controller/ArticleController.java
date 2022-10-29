@@ -8,6 +8,7 @@ import com.dreekde.sportal.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -65,18 +66,11 @@ public class ArticleController extends AbstractController {
     }
 
     @PostMapping()
-    public ArticleDTO addArticle(@RequestBody ArticleCreateDTO articleCreateDTO,
+    public ArticleDTO addArticle(@ModelAttribute ArticleCreateDTO articleCreateDTO,
+                                 @RequestParam(value = "file") MultipartFile file,
                                  HttpSession session) {
         validateAdmin(session);
-        return articleService.createNewArticle(articleCreateDTO);
-    }
-
-    @PostMapping("/{aid}/image")
-    public String uploadArticleImage(@PathVariable long aid,
-                                     @RequestParam(value = "file") MultipartFile file,
-                                     HttpSession session) {
-        validateAdmin(session);
-        return articleService.uploadArticleImage(aid, file);
+        return articleService.createNewArticle(articleCreateDTO, file);
     }
 
     @DeleteMapping("/{id}")
