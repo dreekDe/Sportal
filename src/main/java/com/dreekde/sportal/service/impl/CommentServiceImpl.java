@@ -67,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
         if (parent.getParent() != null) {
             throw new MethodNotAllowedException(METHOD_NOT_ALLOWED);
         }
-        Comment comment = createComment(commentCreateReplayDTO,
+        Comment comment = createComment(commentCreateReplayDTO.getText(),
                 commentCreateReplayDTO.getArticle(),
                 commentCreateReplayDTO.getOwner());
         comment.setParent(parent);
@@ -78,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO) {
-        Comment comment = createComment(commentCreateDTO,
+        Comment comment = createComment(commentCreateDTO.getText(),
                 commentCreateDTO.getArticle(),
                 commentCreateDTO.getOwner());
         commentRepository.save(comment);
@@ -95,8 +95,12 @@ public class CommentServiceImpl implements CommentService {
         throw new MethodNotAllowedException(NOT_ALLOWED);
     }
 
-    private <T> Comment createComment(T dto, long aid, long oid) {
-        Comment comment = modelMapper.map(dto, Comment.class);
+    private Comment createComment(String text, long aid, long oid) {
+        Comment comment = new Comment();
+        comment.setText(text);
+        if (text == null || text.isEmpty()){
+            throw new BadRequestException(INVALID_COMMENT);
+        }
         comment.setPostDate(LocalDateTime.now());
         comment.setArticle(articleService.getArticleById(aid));
         User user = userService.getUser(oid);
