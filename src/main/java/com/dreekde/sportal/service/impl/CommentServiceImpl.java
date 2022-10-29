@@ -1,9 +1,9 @@
 package com.dreekde.sportal.service.impl;
 
-import com.dreekde.sportal.model.dto.comment.ChildCommentDTO;
+import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
-import com.dreekde.sportal.model.dto.comment.CommentCreateReplayDTO;
+import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
 import com.dreekde.sportal.model.entities.Comment;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
@@ -62,23 +62,37 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public ChildCommentDTO addReplayComment(CommentCreateReplayDTO commentCreateReplayDTO) {
-        Comment parent = getCommentById(commentCreateReplayDTO.getParent());
+    public CommentReplyDTO addReplyComment(CommentCreateReplyDTO commentCreateReplyDTO) {
+        Comment parent = getCommentById(commentCreateReplyDTO.getParent());
         if (parent.getParent() != null) {
             throw new MethodNotAllowedException(METHOD_NOT_ALLOWED);
         }
-        Comment comment = createComment(commentCreateReplayDTO.getText(),
-                commentCreateReplayDTO.getArticle(),
-                commentCreateReplayDTO.getOwner());
+        Comment comment = createComment(
+                commentCreateReplyDTO.getText(),
+                commentCreateReplyDTO.getArticle(),
+                commentCreateReplyDTO.getOwner());
         comment.setParent(parent);
         commentRepository.save(comment);
-        return modelMapper.map(comment, ChildCommentDTO.class);
+        return modelMapper.map(comment, CommentReplyDTO.class);
+    }
+
+    @Override
+    public List<CommentReplyDTO> getAllCommentReplies(long id) {
+        if (id <= 0) {
+            throw new BadRequestException(INVALID_COMMENT);
+        }
+        List<Comment> allChildComments = commentRepository
+                .findAllByParentIdOrderByPostDateDesc(id);
+        return allChildComments.stream()
+                .map(c -> modelMapper.map(c, CommentReplyDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
     public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO) {
-        Comment comment = createComment(commentCreateDTO.getText(),
+        Comment comment = createComment(
+                commentCreateDTO.getText(),
                 commentCreateDTO.getArticle(),
                 commentCreateDTO.getOwner());
         commentRepository.save(comment);
@@ -98,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
     private Comment createComment(String text, long aid, long oid) {
         Comment comment = new Comment();
         comment.setText(text);
-        if (text == null || text.isEmpty()){
+        if (text == null || text.isEmpty()) {
             throw new BadRequestException(INVALID_COMMENT);
         }
         comment.setPostDate(LocalDateTime.now());

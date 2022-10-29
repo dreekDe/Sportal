@@ -7,7 +7,7 @@ import lombok.Data;
  * @author Desislava Tencheva
  */
 @Data
-public class ChildCommentDTO {
+public class CommentReplyDTO {
 
     private long id;
     private UserWithoutPasswordDTO owner;

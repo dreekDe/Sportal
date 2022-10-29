@@ -1,9 +1,9 @@
 package com.dreekde.sportal.controller;
 
-import com.dreekde.sportal.model.dto.comment.ChildCommentDTO;
+import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
-import com.dreekde.sportal.model.dto.comment.CommentCreateReplayDTO;
+import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
 import com.dreekde.sportal.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +36,11 @@ public class CommentController extends AbstractController {
         return commentService.getAllCommentsByArticle(aid);
     }
 
+    @GetMapping("/{cid}/replies")
+    public List<CommentReplyDTO> getAllCommentReplies(@PathVariable long cid) {
+        return commentService.getAllCommentReplies(cid);
+    }
+
     @PostMapping()
     public CommentDTO createComment(@RequestBody CommentCreateDTO commentCreateDTO,
                                     HttpSession session) {
@@ -44,12 +49,12 @@ public class CommentController extends AbstractController {
         return commentService.createNewComment(commentCreateDTO);
     }
 
-    @PostMapping("/{cid}")
-    public ChildCommentDTO addReplayComment(@RequestBody CommentCreateReplayDTO commentCreateReplayDTO,
-                                            HttpSession session) {
+    @PostMapping("/reply")
+    public CommentReplyDTO addCommentReply(@RequestBody CommentCreateReplyDTO commentCreateReplyDTO,
+                                           HttpSession session) {
         long userId = getLoggedUserId(session);
-        validateEqualsUser(userId, commentCreateReplayDTO.getOwner());
-        return commentService.addReplayComment(commentCreateReplayDTO);
+        validateEqualsUser(userId, commentCreateReplyDTO.getOwner());
+        return commentService.addReplyComment(commentCreateReplyDTO);
     }
 
     @DeleteMapping("/{cid}")

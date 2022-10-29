@@ -1,9 +1,9 @@
 package com.dreekde.sportal.service;
 
-import com.dreekde.sportal.model.dto.comment.ChildCommentDTO;
+import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
+import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
-import com.dreekde.sportal.model.dto.comment.CommentCreateReplayDTO;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ public interface CommentService {
 
     List<CommentDTO> getAllCommentsByArticle(long id);
 
-    ChildCommentDTO addReplayComment(CommentCreateReplayDTO commentReplayDTO);
+    CommentReplyDTO addReplyComment(CommentCreateReplyDTO commentReplyDTO);
 
+    List<CommentReplyDTO> getAllCommentReplies(long id);
 }
