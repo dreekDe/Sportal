@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private static final String CATEGORY_ALREADY_EXIST = "Category already exists!";
     private static final String CATEGORY_NOT_FOUND = "Category not found!";
-    private static final String INVALID_CATEGORY_NAME = "Category can not be empty!";
+    private static final String INVALID_CATEGORY = "Invalid category!";
 
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
@@ -33,13 +33,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryServiceImpl(CategoryRepository categoryRepository, ModelMapper modelMapper) {
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
-    }
-
-    @Override
-    public CategoryDTO getCategoryById(long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
-        return modelMapper.map(category,CategoryDTO.class);
     }
 
     @Override
@@ -81,13 +74,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category getCategory(long id) {
+        if (id <= 0){
+            throw new BadRequestException(INVALID_CATEGORY);
+        }
         return categoryRepository.getByIdAndAvailable(true, id)
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND));
     }
 
     private void validateInputString(String string) {
         if (string == null || string.trim().isEmpty()) {
-            throw new BadRequestException(CategoryServiceImpl.INVALID_CATEGORY_NAME);
+            throw new BadRequestException(INVALID_CATEGORY);
         }
     }
 }

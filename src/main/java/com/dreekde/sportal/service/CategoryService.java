@@ -13,8 +13,6 @@ public interface CategoryService {
 
     Category getCategory(long id);
 
-    CategoryDTO getCategoryById(long id);
-
     List<CategoryDTO> getAllCategories();
 
     CategoryDTO addCategory(CategoryCreateDto categoryCreateDto);
