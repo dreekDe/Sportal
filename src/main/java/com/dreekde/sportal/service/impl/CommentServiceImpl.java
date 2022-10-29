@@ -55,6 +55,7 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> comments = articleService.getArticleById(id).getComments();
         return comments.stream()
                 .filter(c -> c.getParent() == null)
+                .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))
                 .map(comment -> modelMapper.map(comment, CommentDTO.class))
                 .collect(Collectors.toList());
     }
@@ -66,11 +67,9 @@ public class CommentServiceImpl implements CommentService {
         if (parent.getParent() != null) {
             throw new MethodNotAllowedException(METHOD_NOT_ALLOWED);
         }
-        Comment comment = modelMapper.map(commentCreateReplayDTO, Comment.class);
-        comment.setPostDate(LocalDateTime.now());
-        comment.setArticle(articleService.getArticleById(commentCreateReplayDTO.getArticle()));
-        User user = userService.getUser(commentCreateReplayDTO.getOwner());
-        comment.setOwner(user);
+        Comment comment = createComment(commentCreateReplayDTO,
+                commentCreateReplayDTO.getArticle(),
+                commentCreateReplayDTO.getOwner());
         comment.setParent(parent);
         commentRepository.save(comment);
         return modelMapper.map(comment, ChildCommentDTO.class);
@@ -79,11 +78,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO) {
-        Comment comment = modelMapper.map(commentCreateDTO, Comment.class);
-        comment.setPostDate(LocalDateTime.now());
-        comment.setArticle(articleService.getArticleById(commentCreateDTO.getArticle()));
-        User user = userService.getUser(commentCreateDTO.getOwner());
-        comment.setOwner(user);
+        Comment comment = createComment(commentCreateDTO,
+                commentCreateDTO.getArticle(),
+                commentCreateDTO.getOwner());
         commentRepository.save(comment);
         return modelMapper.map(comment, CommentDTO.class);
     }
@@ -96,6 +93,15 @@ public class CommentServiceImpl implements CommentService {
             return comment.getId();
         }
         throw new MethodNotAllowedException(NOT_ALLOWED);
+    }
+
+    private <T> Comment createComment(T dto, long aid, long oid) {
+        Comment comment = modelMapper.map(dto, Comment.class);
+        comment.setPostDate(LocalDateTime.now());
+        comment.setArticle(articleService.getArticleById(aid));
+        User user = userService.getUser(oid);
+        comment.setOwner(user);
+        return comment;
     }
 
     private Comment getCommentById(long id) {
