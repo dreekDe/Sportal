@@ -99,6 +99,7 @@ public class CommentServiceImpl implements CommentService {
         return modelMapper.map(comment, CommentDTO.class);
     }
 
+    @Transactional
     @Override
     public long deleteComment(long id, long userId) {
         Comment comment = getCommentById(id);

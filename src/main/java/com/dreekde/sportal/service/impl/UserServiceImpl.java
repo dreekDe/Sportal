@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,6 +53,7 @@ public class UserServiceImpl implements UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    @Transactional
     @Override
     public long editUser(UserEditDTO userEditDTO) {
         String password = userEditDTO.getPassword().trim();
@@ -77,6 +79,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user).getId();
     }
 
+    @Transactional
     @Override
     public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO) {
         if (!isValidPassword(userEditPasswordDTO.getNewPassword().trim())) {
@@ -92,6 +95,7 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Transactional
     @Override
     public long deleteUser(UserDeleteDTO userDeleteDTO) {
         String password = userDeleteDTO.getPassword().trim();
@@ -137,7 +141,7 @@ public class UserServiceImpl implements UserService {
     public UserWithoutPasswordDTO login(UserLoginDTO userLoginDTO) {
         String username = userLoginDTO.getUsername().trim();
         String password = userLoginDTO.getPassword().trim();
-        if (!isValidName(username) || !isValidPassword(password)) {
+        if (isValidName(username) || !isValidPassword(password)) {
             throw new BadRequestException(WRONG_CREDENTIAL);
         }
         User user = userRepository.findByUsername(username)
@@ -148,6 +152,7 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserWithoutPasswordDTO.class);
     }
 
+    @Transactional
     @Override
     public UserWithoutPasswordDTO register(UserRegisterDTO userRegisterDTO) {
         validationUserRegisterDTO(userRegisterDTO);
@@ -201,7 +206,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validationNames(String username, String firstName, String lastName) {
-        if (!isValidName(username) || !isValidName(firstName) || !isValidName(lastName)) {
+        if (isValidName(username) || isValidName(firstName) || isValidName(lastName)) {
             throw new BadRequestException(INVALID_DATA);
         }
     }
@@ -230,6 +235,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isValidName(String input) {
-        return input != null && input.length() >= 2 && input.length() < 15;
+        return input == null || input.length() < 2 || input.length() >= 15;
     }
 }
