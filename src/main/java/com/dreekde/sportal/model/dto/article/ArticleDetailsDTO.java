@@ -1,5 +1,6 @@
 package com.dreekde.sportal.model.dto.article;
 
+import com.dreekde.sportal.model.dto.comment.CommentDTO;
 import com.dreekde.sportal.model.dto.image.ImageDTO;
 import lombok.Data;
 
@@ -19,5 +20,6 @@ public class ArticleDetailsDTO {
     private AuthorDTO author;
     private LocalDateTime postDate;
     private List<ImageDTO> images;
+    private List<CommentDTO> comments;
 
 }

@@ -30,6 +30,7 @@ public abstract class AbstractController {
     protected static final String LOGOUT = "Logout success!";
     protected static final String NOT_ALLOWED = "Not allowed operation!";
     protected static final String UNAUTHORIZED = "Not authorized!";
+    private static final String INVALID_OWNER = "Invalid owner!";
 
     @Autowired
     private UserService userService;
@@ -117,6 +118,12 @@ public abstract class AbstractController {
             if (!userService.userIsAdmin(loggedUserId)) {
                 throw new AuthenticationException(UNAUTHORIZED);
             }
+        }
+    }
+
+    protected void validateEqualsUser(long user, long loggedUserId) {
+        if (user != loggedUserId) {
+            throw new BadRequestException(INVALID_OWNER);
         }
     }
 }
