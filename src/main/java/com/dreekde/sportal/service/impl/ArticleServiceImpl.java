@@ -76,7 +76,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAuthor(userService.getUser(articleCreateDTO.getAuthor()));
         article.setAvailable(true);
         article = articleRepository.save(article);
-        imageService.uploadImage(article.getId(),file);
+        imageService.uploadImage(article.getId(), file);
         return modelMapper.map(article, ArticleDTO.class);
     }
 
