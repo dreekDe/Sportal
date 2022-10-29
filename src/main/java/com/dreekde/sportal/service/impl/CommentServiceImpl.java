@@ -62,15 +62,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public CommentReplyDTO addReplyComment(CommentCreateReplyDTO commentCreateReplyDTO) {
+    public CommentReplyDTO addReplyComment(CommentCreateReplyDTO commentCreateReplyDTO, long userId) {
         Comment parent = getCommentById(commentCreateReplyDTO.getParent());
         if (parent.getParent() != null) {
             throw new MethodNotAllowedException(METHOD_NOT_ALLOWED);
         }
-        Comment comment = createComment(
-                commentCreateReplyDTO.getText(),
-                commentCreateReplyDTO.getArticle(),
-                commentCreateReplyDTO.getOwner());
+        Comment comment = createComment(commentCreateReplyDTO.getText(),
+                commentCreateReplyDTO.getArticle(), userId);
         comment.setParent(parent);
         commentRepository.save(comment);
         return modelMapper.map(comment, CommentReplyDTO.class);
@@ -90,16 +88,13 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO) {
-        Comment comment = createComment(
-                commentCreateDTO.getText(),
-                commentCreateDTO.getArticle(),
-                commentCreateDTO.getOwner());
+    public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO, long userId) {
+        Comment comment = createComment(commentCreateDTO.getText(),
+                commentCreateDTO.getArticle(), userId);
         commentRepository.save(comment);
         return modelMapper.map(comment, CommentDTO.class);
     }
 
-    @Transactional
     @Override
     public long deleteComment(long id, long userId) {
         Comment comment = getCommentById(id);

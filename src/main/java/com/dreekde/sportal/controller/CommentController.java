@@ -45,16 +45,14 @@ public class CommentController extends AbstractController {
     public CommentDTO createComment(@RequestBody CommentCreateDTO commentCreateDTO,
                                     HttpSession session) {
         long userId = getLoggedUserId(session);
-        validateEqualsUser(userId, commentCreateDTO.getOwner());
-        return commentService.createNewComment(commentCreateDTO);
+        return commentService.createNewComment(commentCreateDTO, userId);
     }
 
     @PostMapping("/reply")
     public CommentReplyDTO addCommentReply(@RequestBody CommentCreateReplyDTO commentCreateReplyDTO,
                                            HttpSession session) {
         long userId = getLoggedUserId(session);
-        validateEqualsUser(userId, commentCreateReplyDTO.getOwner());
-        return commentService.addReplyComment(commentCreateReplyDTO);
+        return commentService.addReplyComment(commentCreateReplyDTO, userId);
     }
 
     @DeleteMapping("/{cid}")

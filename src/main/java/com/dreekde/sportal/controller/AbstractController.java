@@ -121,9 +121,4 @@ public abstract class AbstractController {
         }
     }
 
-    protected void validateEqualsUser(long user, long loggedUserId) {
-        if (user != loggedUserId) {
-            throw new BadRequestException(INVALID_OWNER);
-        }
-    }
 }
