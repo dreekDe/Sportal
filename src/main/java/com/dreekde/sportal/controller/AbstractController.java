@@ -80,16 +80,6 @@ public abstract class AbstractController {
         return exceptionDTO;
     }
 
-    protected void validationEditUser(HttpServletRequest request, long userEditId) {
-        long userId = getLoggedUserId(request.getSession());
-        if (userId <= 0) {
-            throw new BadRequestException(NOT_LOGGED);
-        }
-        if (userId != userEditId) {
-            throw new MethodNotAllowedException(NOT_ALLOWED);
-        }
-    }
-
     protected void loginUser(HttpServletRequest request, long id) {
         HttpSession session = request.getSession();
         session.setAttribute(LOGGED, true);

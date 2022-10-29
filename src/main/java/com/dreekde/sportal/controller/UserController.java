@@ -89,19 +89,22 @@ public class UserController extends AbstractController {
     }
 
     @PutMapping("/pass")
-    public long changePassword(@RequestBody UserEditPasswordDTO userEditPasswordDTO,
-                               HttpServletRequest request) {
-        validationEditUser(request, userEditPasswordDTO.getId());
-        long userId = userService.changePassword(userEditPasswordDTO).getId();
-        request.getSession().invalidate();
-        return userId;
+    public UserWithoutPasswordDTO changePassword(@RequestBody UserEditPasswordDTO userEditPasswordDTO,
+                                                 HttpSession session) {
+        long userId = getLoggedUserId(session);
+        UserWithoutPasswordDTO user = userService.changePassword(userEditPasswordDTO, userId);
+        session.invalidate();
+        return user;
     }
 
     @PutMapping("/edit")
-    public long editUser(@RequestBody UserEditDTO userEditDTO, HttpServletRequest request) {
-        validationEditUser(request, userEditDTO.getId());
-        long userId = userService.editUser(userEditDTO);
-        request.getSession().invalidate();
-        return userId;
+    public long editUser(@RequestBody UserEditDTO userEditDTO, HttpSession session) {
+        long userId = getLoggedUserId(session);
+        if (userId != userEditDTO.getId()) {
+            throw new MethodNotAllowedException(NOT_ALLOWED);
+        }
+        long user = userService.editUser(userEditDTO);
+        session.invalidate();
+        return user;
     }
 }

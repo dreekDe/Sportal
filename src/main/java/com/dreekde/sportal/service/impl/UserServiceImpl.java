@@ -81,13 +81,12 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO) {
+    public UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO, long id) {
         if (!isValidPassword(userEditPasswordDTO.getNewPassword().trim())) {
             throw new BadRequestException(INVALID_PASSWORD);
         }
         String password = userEditPasswordDTO.getOldPassword().trim();
-        long userId = userEditPasswordDTO.getId();
-        User user = validationUserCredential(password, userId);
+        User user = validationUserCredential(password, id);
         matchingPasswords(userEditPasswordDTO.getNewPassword().trim(),
                 userEditPasswordDTO.getConfirmPassword().trim());
         user.setPassword(bCryptPasswordEncoder.encode(userEditPasswordDTO.getNewPassword()));
