@@ -28,6 +28,4 @@ public interface ArticleService {
     ArticleDTO editArticle(ArticleEditDTO articleEditDTO);
 
     List<ArticleDTO> getAllArticlesByTitle(String title , int page, int pageSize);
-
-    String uploadArticleImage(long aid, MultipartFile file);
 }

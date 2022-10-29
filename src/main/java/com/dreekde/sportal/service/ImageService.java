@@ -2,7 +2,7 @@ package com.dreekde.sportal.service;
 
 import com.dreekde.sportal.model.dto.image.ImageDTO;
 import com.dreekde.sportal.model.dto.image.ImageDeleteDTO;
-import com.dreekde.sportal.model.entities.Article;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ImageService {
 
-    String uploadImage(Article article, String canonicalPath);
+    ImageDTO uploadImage(long aid, MultipartFile file);
 
     long deleteImage(ImageDeleteDTO imageDeleteDTO);
 

@@ -12,7 +12,6 @@ import com.dreekde.sportal.service.ArticleService;
 import com.dreekde.sportal.service.CategoryService;
 import com.dreekde.sportal.service.ImageService;
 import com.dreekde.sportal.service.UserService;
-import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -37,11 +32,8 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
-    private static final String FILE_EXIST = "The file already exist!";
     private static final String MISSING_TEXT = "Title or text can not be empty!";
     private static final String ARTICLE_DOES_NOT_EXIST = "This article does not exist!";
-    private static final String NOT_UPLOADED = "Upload failed!";
-    private static final String FILE_EMPTY = "Not attached file!";
     private static final String INVALID_ARTICLE = "Invalid article!";
 
     private final CategoryService categoryService;
@@ -84,7 +76,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAuthor(userService.getUser(articleCreateDTO.getAuthor()));
         article.setAvailable(true);
         article = articleRepository.save(article);
-        uploadArticleImage(article.getId(), file);
+        imageService.uploadImage(article.getId(),file);
         return modelMapper.map(article, ArticleDTO.class);
     }
 
@@ -152,29 +144,6 @@ public class ArticleServiceImpl implements ArticleService {
         article.setAuthor(userService.getUser(articleEditDTO.getAuthor()));
         articleRepository.save(article);
         return modelMapper.map(article, ArticleDTO.class);
-    }
-
-    @Transactional
-    @Override
-    public String uploadArticleImage(long aid, MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BadRequestException(FILE_EMPTY);
-        }
-        try {
-            Article article = getArticleById(aid);
-            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-            Path path = Path.of("uploads");
-            String name = System.nanoTime() + "." + ext;
-            File uploadFile = new File(String.valueOf(path), name);
-            if (!uploadFile.exists()) {
-                Files.copy(file.getInputStream(), uploadFile.toPath());
-            } else {
-                throw new BadRequestException(FILE_EXIST);
-            }
-            return imageService.uploadImage(article, name);
-        } catch (IOException e) {
-            throw new BadRequestException(NOT_UPLOADED, e);
-        }
     }
 
     @Override
