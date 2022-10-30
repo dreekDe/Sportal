@@ -55,6 +55,18 @@ public class CommentController extends AbstractController {
         return commentService.addReplyComment(commentCreateReplyDTO, userId);
     }
 
+    @PostMapping("/{cid}/like")
+    public int like(@PathVariable long cid, HttpSession session) {
+        long userId = getLoggedUserId(session);
+        return commentService.like(cid, userId);
+    }
+
+    @PostMapping("/{cid}/dislike")
+    public int dislike(@PathVariable long cid, HttpSession session) {
+        long userId = getLoggedUserId(session);
+        return commentService.dislike(cid, userId);
+    }
+
     @DeleteMapping("/{cid}")
     public long deleteComment(@PathVariable long cid, HttpSession session) {
         long userId = getLoggedUserId(session);

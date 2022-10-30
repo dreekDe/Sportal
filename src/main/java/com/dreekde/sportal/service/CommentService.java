@@ -21,4 +21,9 @@ public interface CommentService {
     CommentReplyDTO addReplyComment(CommentCreateReplyDTO commentReplyDTO, long userId);
 
     List<CommentReplyDTO> getAllCommentReplies(long id);
+
+    int like(long id, long userId);
+
+    int dislike(long id, long userId);
+
 }

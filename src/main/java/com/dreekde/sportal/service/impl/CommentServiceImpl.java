@@ -4,6 +4,7 @@ import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
+import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.Comment;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
@@ -84,6 +85,34 @@ public class CommentServiceImpl implements CommentService {
         return allChildComments.stream()
                 .map(c -> modelMapper.map(c, CommentReplyDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int like(long id, long userId) {
+        Comment comment = getCommentById(id);
+        User user = userService.getUser(userId);
+        if (comment.getLikers().contains(user)) {
+            comment.getLikers().remove(user);
+        } else {
+            comment.getLikers().add(user);
+        }
+        comment.getDislikers().remove(user);
+        commentRepository.save(comment);
+        return comment.getLikers().size();
+    }
+
+    @Override
+    public int dislike(long id, long userId) {
+        Comment comment = getCommentById(id);
+        User user = userService.getUser(userId);
+        if (comment.getDislikers().contains(user)) {
+            comment.getDislikers().remove(user);
+        } else {
+            comment.getDislikers().add(user);
+        }
+        comment.getLikers().remove(user);
+        commentRepository.save(comment);
+        return comment.getDislikers().size();
     }
 
     @Transactional
