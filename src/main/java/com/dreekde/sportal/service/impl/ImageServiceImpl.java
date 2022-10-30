@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 @Repository
 public class ImageServiceImpl implements ImageService {
 
+    private static final String DIRECTORY = "uploads";
     private static final String NOT_UPLOADED = "Upload failed!";
     private static final String FILE_EMPTY = "Not attached file!";
     private static final String FILE_EXIST = "The file already exist!";
@@ -59,10 +59,10 @@ public class ImageServiceImpl implements ImageService {
         if (images.size() == 0) {
             throw new NotFoundException(NOT_FOUND);
         }
-        long id = imageDeleteDTO.getImageId();
-        imageRepository.deleteById(id);
-        return id;
+       imageRepository.deleteById(imageDeleteDTO.getImageId());
+        return imageDeleteDTO.getImageId();
     }
+
 
     @Override
     public List<ImageDTO> getAllImagesByArticleId(long id) {
@@ -80,15 +80,14 @@ public class ImageServiceImpl implements ImageService {
         try {
             Article article = articleService.getArticleById(aid);
             String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-            Path path = Path.of("uploads");
-            String name = System.nanoTime() + "." + ext;
-            File uploadFile = new File(String.valueOf(path), name);
+            String name = DIRECTORY + File.separator + System.nanoTime() + "." + ext;
+            File uploadFile = new File(name);
             if (!uploadFile.exists()) {
                 Files.copy(file.getInputStream(), uploadFile.toPath());
             } else {
                 throw new BadRequestException(FILE_EXIST);
             }
-            return modelMapper.map(saveImage(article, name),ImageDTO.class);
+            return modelMapper.map(saveImage(article, name), ImageDTO.class);
         } catch (IOException e) {
             throw new BadRequestException(NOT_UPLOADED, e);
         }

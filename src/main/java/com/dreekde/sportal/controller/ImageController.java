@@ -29,7 +29,6 @@ import java.util.List;
 @RequestMapping("/images")
 public class ImageController extends AbstractController {
 
-    private static final String NOT_FOUND = "File not found!";
     private final ImageService imageService;
 
     @Autowired
@@ -38,14 +37,14 @@ public class ImageController extends AbstractController {
     }
 
     @GetMapping("/art/{id}")
-    public List<ImageDTO> getAllImagesByArticleId(@PathVariable long id){
+    public List<ImageDTO> getAllImagesByArticleId(@PathVariable long id) {
         return imageService.getAllImagesByArticleId(id);
     }
 
     @GetMapping("/{imageName}")
     @SneakyThrows
     public void download(@PathVariable String imageName, HttpServletResponse response) {
-        File file = new File("uploads" + "/" + imageName);
+        File file = new File(DIRECTORY + File.separator + imageName);
         System.out.println(file.toPath());
         if (!file.exists()) {
             throw new NotFoundException(NOT_FOUND);
@@ -56,8 +55,8 @@ public class ImageController extends AbstractController {
 
     @PostMapping("/{aid}")
     public ImageDTO uploadImages(@PathVariable long aid,
-                                       @RequestParam(value = "file") MultipartFile file,
-                                       HttpSession session) {
+                                 @RequestParam(value = "file") MultipartFile file,
+                                 HttpSession session) {
         validateAdmin(session);
         return imageService.uploadImage(aid, file);
     }

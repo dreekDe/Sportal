@@ -30,7 +30,9 @@ public abstract class AbstractController {
     protected static final String LOGOUT = "Logout success!";
     protected static final String NOT_ALLOWED = "Not allowed operation!";
     protected static final String UNAUTHORIZED = "Not authorized!";
-    private static final String INVALID_OWNER = "Invalid owner!";
+    protected static final String NOT_FOUND = "File not found!";
+    protected static final String DIRECTORY = "uploads";
+
 
     @Autowired
     private UserService userService;
