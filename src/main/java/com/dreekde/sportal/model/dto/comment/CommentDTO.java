@@ -12,6 +12,7 @@ public class CommentDTO {
     private long id;
     private UserWithoutPasswordDTO owner;
     private String text;
-   //todo private int likes;
-   //todo private int dislikes;
+    private int like;
+    private int dislike;
+    private int comments;
 }

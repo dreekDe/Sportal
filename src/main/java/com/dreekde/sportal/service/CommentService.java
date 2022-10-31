@@ -4,6 +4,7 @@ import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
+import com.dreekde.sportal.model.entities.Comment;
 
 import java.util.List;
 
@@ -22,8 +23,9 @@ public interface CommentService {
 
     List<CommentReplyDTO> getAllCommentReplies(long id);
 
-    int like(long id, long userId);
+    int like(long cid, long userId);
 
-    int dislike(long id, long userId);
+    int dislike(long cid, long userId);
 
+    void deleteAllComments(List<Comment> comments);
 }

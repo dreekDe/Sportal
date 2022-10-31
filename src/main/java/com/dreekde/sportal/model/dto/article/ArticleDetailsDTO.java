@@ -20,6 +20,6 @@ public class ArticleDetailsDTO {
     private AuthorDTO author;
     private LocalDateTime postDate;
     private List<ImageDTO> images;
-    private List<CommentDTO> comments;
+    private int countComments;
 
 }

@@ -4,7 +4,7 @@ import com.dreekde.sportal.model.dto.comment.CommentReplyDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateDTO;
 import com.dreekde.sportal.model.dto.comment.CommentDTO;
 import com.dreekde.sportal.model.dto.comment.CommentCreateReplyDTO;
-import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
+import com.dreekde.sportal.model.entities.Article;
 import com.dreekde.sportal.model.entities.Comment;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
@@ -56,8 +56,30 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> comments = articleService.getArticleById(id).getComments();
         return comments.stream()
                 .filter(c -> c.getParent() == null)
-                .sorted((a, b) -> b.getPostDate().compareTo(a.getPostDate()))
-                .map(comment -> modelMapper.map(comment, CommentDTO.class))
+                .map(comment -> {
+                    CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
+                    commentDTO.setComments(getAllCommentReplies(commentDTO.getId()).size());
+                    commentDTO.setLike(comment.getLikers().size());
+                    commentDTO.setDislike(comment.getDislikers().size());
+                    return commentDTO;
+                })
+                .collect(Collectors.toList());
+
+    }
+    @Override
+    public List<CommentReplyDTO> getAllCommentReplies(long id) {
+        if (id <= 0) {
+            throw new BadRequestException(INVALID_COMMENT);
+        }
+        List<Comment> allChildComments = commentRepository
+                .findAllByParentId(id);
+        return allChildComments.stream()
+                .map(c ->{
+                    CommentReplyDTO commentReplyDTO = modelMapper.map(c, CommentReplyDTO.class);
+                    commentReplyDTO.setLike(c.getLikers().size());
+                    commentReplyDTO.setDislike(c.getDislikers().size());
+                    return commentReplyDTO;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -68,58 +90,18 @@ public class CommentServiceImpl implements CommentService {
         if (parent.getParent() != null) {
             throw new MethodNotAllowedException(METHOD_NOT_ALLOWED);
         }
-        Comment comment = createComment(commentCreateReplyDTO.getText(),
-                commentCreateReplyDTO.getArticle(), userId);
+        Comment comment = createComment(userId, commentCreateReplyDTO.getArticle(),
+                commentCreateReplyDTO.getText());
         comment.setParent(parent);
         commentRepository.save(comment);
         return modelMapper.map(comment, CommentReplyDTO.class);
     }
 
-    @Override
-    public List<CommentReplyDTO> getAllCommentReplies(long id) {
-        if (id <= 0) {
-            throw new BadRequestException(INVALID_COMMENT);
-        }
-        List<Comment> allChildComments = commentRepository
-                .findAllByParentIdOrderByPostDateDesc(id);
-        return allChildComments.stream()
-                .map(c -> modelMapper.map(c, CommentReplyDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public int like(long id, long userId) {
-        Comment comment = getCommentById(id);
-        User user = userService.getUser(userId);
-        if (comment.getLikers().contains(user)) {
-            comment.getLikers().remove(user);
-        } else {
-            comment.getLikers().add(user);
-        }
-        comment.getDislikers().remove(user);
-        commentRepository.save(comment);
-        return comment.getLikers().size();
-    }
-
-    @Override
-    public int dislike(long id, long userId) {
-        Comment comment = getCommentById(id);
-        User user = userService.getUser(userId);
-        if (comment.getDislikers().contains(user)) {
-            comment.getDislikers().remove(user);
-        } else {
-            comment.getDislikers().add(user);
-        }
-        comment.getLikers().remove(user);
-        commentRepository.save(comment);
-        return comment.getDislikers().size();
-    }
-
     @Transactional
     @Override
     public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO, long userId) {
-        Comment comment = createComment(commentCreateDTO.getText(),
-                commentCreateDTO.getArticle(), userId);
+        Comment comment = createComment(userId, commentCreateDTO.getArticle(),
+                commentCreateDTO.getText());
         commentRepository.save(comment);
         return modelMapper.map(comment, CommentDTO.class);
     }
@@ -134,17 +116,37 @@ public class CommentServiceImpl implements CommentService {
         throw new MethodNotAllowedException(NOT_ALLOWED);
     }
 
-    private Comment createComment(String text, long aid, long oid) {
-        Comment comment = new Comment();
-        comment.setText(text);
-        if (text == null || text.isEmpty()) {
-            throw new BadRequestException(INVALID_COMMENT);
+    @Override
+    public int like(long cid, long userId) {
+        Comment comment = getCommentById(cid);
+        User user = userService.getUser(userId);
+        if (comment.getLikers().contains(user)) {
+            comment.getLikers().remove(user);
+        } else {
+            comment.getLikers().add(user);
         }
-        comment.setPostDate(LocalDateTime.now());
-        comment.setArticle(articleService.getArticleById(aid));
-        User user = userService.getUser(oid);
-        comment.setOwner(user);
-        return comment;
+        comment.getDislikers().remove(user);
+        commentRepository.save(comment);
+        return comment.getLikers().size();
+    }
+
+    @Override
+    public int dislike(long cid, long userId) {
+        Comment comment = getCommentById(cid);
+        User user = userService.getUser(userId);
+        if (comment.getDislikers().contains(user)) {
+            comment.getDislikers().remove(user);
+        } else {
+            comment.getDislikers().add(user);
+        }
+        comment.getLikers().remove(user);
+        commentRepository.save(comment);
+        return comment.getDislikers().size();
+    }
+
+    @Override
+    public void deleteAllComments(List<Comment> comments) {
+       commentRepository.deleteAll(comments);
     }
 
     private Comment getCommentById(long id) {
@@ -153,5 +155,19 @@ public class CommentServiceImpl implements CommentService {
         }
         return commentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
+    }
+
+    private Comment createComment(long userId, long aid, String text) {
+        Article article = articleService.getArticleById(aid);
+        if (text == null || text.isEmpty()) {
+            throw new BadRequestException(INVALID_COMMENT);
+        }
+        Comment comment = new Comment();
+        comment.setText(text);
+        comment.setPostDate(LocalDateTime.now());
+        User user = userService.getUser(userId);
+        comment.setOwner(user);
+        comment.setArticle(article);
+        return comment;
     }
 }
