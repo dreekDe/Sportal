@@ -45,13 +45,13 @@ public class Comment {
     @ManyToMany
     @JoinTable(
             name = "users_like_comments",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "comment_id"))
+            joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> likers;
     @ManyToMany
     @JoinTable(
             name = "users_dislike_comments",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "comment_id"))
+            joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> dislikers;
 }
