@@ -37,15 +37,15 @@ public class CommentController extends AbstractController {
     }
 
     @GetMapping("/{cid}/replies")
-    public List<CommentReplyDTO> getAllCommentReplies(@PathVariable long cid) {
+    public List<CommentReplyDTO> getAllCommentRepliesByComment(@PathVariable long cid) {
         return commentService.getAllCommentReplies(cid);
     }
 
     @PostMapping()
-    public CommentDTO createComment(@RequestBody CommentCreateDTO commentCreateDTO,
+    public CommentDTO addComment(@RequestBody CommentCreateDTO commentCreateDTO,
                                     HttpSession session) {
         long userId = getLoggedUserId(session);
-        return commentService.createNewComment(commentCreateDTO, userId);
+        return commentService.addComment(commentCreateDTO, userId);
     }
 
     @PostMapping("/reply")

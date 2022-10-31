@@ -99,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public CommentDTO createNewComment(CommentCreateDTO commentCreateDTO, long userId) {
+    public CommentDTO addComment(CommentCreateDTO commentCreateDTO, long userId) {
         Comment comment = createComment(userId, commentCreateDTO.getArticle(),
                 commentCreateDTO.getText());
         commentRepository.save(comment);

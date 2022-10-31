@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface CommentService {
 
-    CommentDTO createNewComment(CommentCreateDTO commentCreateDTO, long userId);
+    CommentDTO addComment(CommentCreateDTO commentCreateDTO, long userId);
 
     long deleteComment(long id, long userId);
 
