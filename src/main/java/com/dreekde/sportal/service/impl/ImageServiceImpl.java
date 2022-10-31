@@ -56,13 +56,9 @@ public class ImageServiceImpl implements ImageService {
         if (images.size() == 1) {
             throw new MethodNotAllowedException(NOT_ALLOWED);
         }
-        if (images.size() == 0) {
-            throw new NotFoundException(NOT_FOUND);
-        }
        imageRepository.deleteById(imageDeleteDTO.getImageId());
         return imageDeleteDTO.getImageId();
     }
-
 
     @Override
     public List<ImageDTO> getAllImagesByArticleId(long id) {
