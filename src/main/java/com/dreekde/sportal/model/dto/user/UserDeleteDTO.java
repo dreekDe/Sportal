@@ -10,5 +10,4 @@ public class UserDeleteDTO {
 
     private long id;
     private String password;
-    private String confirmPassword;
 }

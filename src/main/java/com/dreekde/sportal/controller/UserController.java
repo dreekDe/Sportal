@@ -6,7 +6,6 @@ import com.dreekde.sportal.model.dto.user.UserEditPasswordDTO;
 import com.dreekde.sportal.model.dto.user.UserLoginDTO;
 import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
-import com.dreekde.sportal.model.exceptions.AuthenticationException;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
 import com.dreekde.sportal.service.impl.UserServiceImpl;
@@ -77,15 +76,12 @@ public class UserController extends AbstractController {
 
     @DeleteMapping()
     public long deleteUser(@RequestBody UserDeleteDTO userDeleteDTO,
-                           HttpServletRequest request) {
-        long userId = getLoggedUserId(request.getSession());
-        if (userId == userDeleteDTO.getId() || userService.userIsAdmin(userId)) {
-            return userService.deleteUser(userDeleteDTO);
+                           HttpSession session) {
+        long userId = getLoggedUserId(session);
+        if (userId == userDeleteDTO.getId()) {
+            return userService.userDelete(userDeleteDTO);
         }
-        if (userId != userDeleteDTO.getId()) {
-            throw new MethodNotAllowedException(NOT_ALLOWED);
-        }
-        throw new AuthenticationException(UNAUTHORIZED);
+        return userService.adminDelete(userDeleteDTO, userId);
     }
 
     @PutMapping("/pass")

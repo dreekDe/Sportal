@@ -8,12 +8,15 @@ import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.entities.User;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
+import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
 import com.dreekde.sportal.model.repositories.UserRepository;
+import com.dreekde.sportal.service.CommentService;
 import com.dreekde.sportal.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,18 +42,24 @@ public class UserServiceImpl implements UserService {
     private static final String USERNAME_OR_EMAIL_ALREADY_EXIST = "Username or email already exist!";
     private static final String INVALID_EMAIL = "Invalid email!";
     private static final String INVALID_USER = "Invalid user!";
+    private static final String NOT_ALLOWED = "Not allowed operation!";
+    private static final String SPORTAL = "Sportal";
+    private static final String NEWS = "news.kk";
 
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CommentService commentService;
 
     @Autowired
     public UserServiceImpl(ModelMapper modelMapper,
                            UserRepository userRepository,
-                           BCryptPasswordEncoder bCryptPasswordEncoder) {
+                           BCryptPasswordEncoder bCryptPasswordEncoder,
+                           @Lazy CommentService commentService) {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.commentService = commentService;
     }
 
     @Transactional
@@ -96,22 +105,47 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public long deleteUser(UserDeleteDTO userDeleteDTO) {
-        String password = userDeleteDTO.getPassword().trim();
-        if (!isValidPassword(password)) {
-            throw new BadRequestException(WRONG_CREDENTIAL);
+    public long userDelete(UserDeleteDTO userDeleteDTO) {
+        User user = getUser(userDeleteDTO.getId());
+        if (!bCryptPasswordEncoder.matches(userDeleteDTO.getPassword().trim(),
+                user.getPassword())) {
+            throw new UnauthorizedException(WRONG_CREDENTIAL);
         }
-        matchingPasswords(password, userDeleteDTO.getConfirmPassword().trim());
-        User user = userRepository.findById(userDeleteDTO.getId())
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        delete(user);
+        userRepository.save(user);
+        return user.getId();
+    }
+
+    @Transactional
+    @Override
+    public long adminDelete(UserDeleteDTO userDeleteDTO, long id) {
+        User user = getUser(id);
+        if (user.isAdmin()) {
+            if (!bCryptPasswordEncoder.matches(userDeleteDTO.getPassword().trim(),
+                    user.getPassword())) {
+                throw new UnauthorizedException(WRONG_CREDENTIAL);
+            }
+            User userToDelete = getUser(userDeleteDTO.getId());
+            delete(userToDelete);
+            userRepository.save(userToDelete);
+            return userToDelete.getId();
+        }
+        throw new MethodNotAllowedException(NOT_ALLOWED);
+    }
+
+    private void delete(User user) {
         String deleteMessage = String.valueOf(LocalDateTime.now());
-        user.setFirstName(deleteMessage);
-        user.setLastName(deleteMessage);
+        if (user.isAdmin()) {
+            user.setFirstName(SPORTAL);
+            user.setLastName(NEWS);
+        } else {
+            user.setFirstName(deleteMessage);
+            user.setLastName(deleteMessage);
+        }
         user.setUsername(deleteMessage);
         user.setEmail(deleteMessage);
         user.setActive(false);
-        userRepository.save(user);
-        return user.getId();
+        commentService.deleteAllComments(user.getComments());
     }
 
     @Override

@@ -19,7 +19,9 @@ public interface UserService {
 
     UserWithoutPasswordDTO changePassword(UserEditPasswordDTO userEditPasswordDTO, long id);
 
-    long deleteUser(UserDeleteDTO userDeleteDTO);
+    long userDelete(UserDeleteDTO userDeleteDTO);
+
+    long adminDelete(UserDeleteDTO userDeleteDTO, long id);
 
     boolean userIsAdmin(long id);
 
