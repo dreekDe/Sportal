@@ -45,7 +45,6 @@ public class ImageController extends AbstractController {
     @SneakyThrows
     public void download(@PathVariable String imageName, HttpServletResponse response) {
         File file = new File(DIRECTORY + File.separator + imageName);
-        System.out.println(file.toPath());
         if (!file.exists()) {
             throw new NotFoundException(NOT_FOUND);
         }

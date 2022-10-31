@@ -7,6 +7,8 @@ import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
 import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.exceptions.UnauthorizedException;
 import com.dreekde.sportal.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +35,7 @@ public abstract class AbstractController {
     protected static final String NOT_FOUND = "File not found!";
     protected static final String DIRECTORY = "uploads";
 
+    Logger logger = LoggerFactory.getLogger(AbstractController.class);
 
     @Autowired
     private UserService userService;
@@ -74,11 +77,11 @@ public abstract class AbstractController {
     }
 
     private ExceptionDTO creatExceptionDTO(Exception message, HttpStatus httpStatus) {
-        message.printStackTrace(); //todo logger
         ExceptionDTO exceptionDTO = new ExceptionDTO();
         exceptionDTO.setStatus(httpStatus.value());
         exceptionDTO.setDateTime(LocalDateTime.now());
         exceptionDTO.setMessage(message.getMessage());
+        logger.error(exceptionDTO.getMessage(), message.getMessage());
         return exceptionDTO;
     }
 

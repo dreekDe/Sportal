@@ -98,7 +98,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<ArticleDTO> getAllArticlesByTitle(String title, int page, int pageSize) {
         validateInputString(title);
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
         return articleRepository.findAllByTitle(true, title, pageable).stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class))
                 .collect(Collectors.toList());
@@ -106,7 +106,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleDTO> getAllArticlesByCategory(String category, int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
         List<Article> allByCategory = articleRepository
                 .findAllByCategory_nameOrderByPostDateDesc(category, pageable);
         return allByCategory.stream()
@@ -118,7 +118,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleDTO> getAllArticles(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
         List<Article> articles = articleRepository.getAllWithPagination(true, pageable);
         return articles.stream()
                 .map(a -> modelMapper.map(a, ArticleDTO.class)).collect(Collectors.toList());
