@@ -133,21 +133,6 @@ public class UserServiceImpl implements UserService {
         throw new MethodNotAllowedException(NOT_ALLOWED);
     }
 
-    private void delete(User user) {
-        String deleteMessage = String.valueOf(LocalDateTime.now());
-        if (user.isAdmin()) {
-            user.setFirstName(SPORTAL);
-            user.setLastName(NEWS);
-        } else {
-            user.setFirstName(deleteMessage);
-            user.setLastName(deleteMessage);
-        }
-        user.setUsername(deleteMessage);
-        user.setEmail(deleteMessage);
-        user.setActive(false);
-        commentService.deleteAllComments(user.getComments());
-    }
-
     @Override
     public boolean userIsAdmin(long id) {
         User user = userRepository.findById(id)
@@ -206,6 +191,21 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.getUserById(true, id)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+    }
+
+    private void delete(User user) {
+        String deleteMessage = String.valueOf(LocalDateTime.now());
+        if (user.isAdmin()) {
+            user.setFirstName(SPORTAL);
+            user.setLastName(NEWS);
+        } else {
+            user.setFirstName(deleteMessage);
+            user.setLastName(deleteMessage);
+        }
+        user.setUsername(deleteMessage);
+        user.setEmail(deleteMessage);
+        user.setActive(false);
+        commentService.deleteAllComments(user.getComments());
     }
 
     private void validationUserRegisterDTO(UserRegisterDTO userRegisterDTO) {
