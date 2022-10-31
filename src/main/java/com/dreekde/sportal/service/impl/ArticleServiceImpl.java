@@ -10,10 +10,12 @@ import com.dreekde.sportal.model.exceptions.NotFoundException;
 import com.dreekde.sportal.model.repositories.ArticleRepository;
 import com.dreekde.sportal.service.ArticleService;
 import com.dreekde.sportal.service.CategoryService;
+import com.dreekde.sportal.service.CommentService;
 import com.dreekde.sportal.service.ImageService;
 import com.dreekde.sportal.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,16 +43,18 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserService userService;
     private final ArticleRepository articleRepository;
     private final ImageService imageService;
+    private final CommentService commentService;
 
     @Autowired
     public ArticleServiceImpl(CategoryService categoryService, ModelMapper modelMapper,
                               UserService userService, ArticleRepository articleRepository,
-                              ImageService imageService) {
+                              ImageService imageService, @Lazy CommentService commentService) {
         this.categoryService = categoryService;
         this.modelMapper = modelMapper;
         this.userService = userService;
         this.articleRepository = articleRepository;
         this.imageService = imageService;
+        this.commentService = commentService;
     }
 
     @Override
@@ -87,6 +91,7 @@ public class ArticleServiceImpl implements ArticleService {
                 orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
         article.setAvailable(false);
         articleRepository.save(article);
+        commentService.deleteAllComments(article.getComments());
         return article.getId();
     }
 
@@ -127,6 +132,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(article);
         ArticleDetailsDTO articleDetailsDTO = modelMapper.map(article, ArticleDetailsDTO.class);
         articleDetailsDTO.setImages(imageService.getAllImagesByArticleId(id));
+        articleDetailsDTO.setCountComments(article.getComments().size());
         return articleDetailsDTO;
     }
 
@@ -137,6 +143,8 @@ public class ArticleServiceImpl implements ArticleService {
         validateInputString(articleEditDTO.getText());
         Article article = articleRepository.findById(articleEditDTO.getId())
                 .orElseThrow(() -> new NotFoundException(ARTICLE_DOES_NOT_EXIST));
+        article.setTitle(articleEditDTO.getTitle());
+        article.setText(articleEditDTO.getText());
         article.setAvailable(true);
         article.setViews(0);
         article.setPostDate(LocalDateTime.now());
