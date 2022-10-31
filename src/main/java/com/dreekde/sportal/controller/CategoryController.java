@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -36,8 +37,8 @@ public class CategoryController extends AbstractController {
 
     @PostMapping()
     public CategoryDTO addCategory(@RequestBody CategoryCreateDto categoryCreateDto,
-                                   HttpServletRequest request) {
-        validateAdmin(request.getSession());
+                                   HttpSession session) {
+        validateAdmin(session);
         return categoryService.addCategory(categoryCreateDto);
     }
 
