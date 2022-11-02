@@ -39,12 +39,14 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/{uid}")
-    public UserWithoutPasswordDTO getUsersById(@PathVariable long uid) {
+    public UserWithoutPasswordDTO getUserById(@PathVariable long uid, HttpSession session) {
+        validateAdmin(session);
         return userService.getUserById(uid);
     }
 
     @GetMapping()
-    public List<UserWithoutPasswordDTO> getAllUsers() {
+    public List<UserWithoutPasswordDTO> getAllUsers(HttpSession session) {
+        validateAdmin(session);
         return userService.getAllUsers();
     }
 
