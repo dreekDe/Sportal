@@ -1,7 +1,6 @@
-# Sportal
+# Sportal - Web based Java Application for sports news
 IT-Talents Season 14 - Final project
 
-Web based Java Application for sports news. 
 
 TECHNOLOGIES:
 - Java 11
@@ -16,6 +15,7 @@ TECHNOLOGIES:
 - GiT
 - Postman
 - MySQL Workbench
+
 
 FUNCTIONALITIES:
 Guest:    
