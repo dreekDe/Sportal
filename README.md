@@ -18,22 +18,25 @@ TECHNOLOGIES:
 - MySQL Workbench
 
 FUNCTIONALITIES:
-Guest:    - View all articles
-              - Filter top 5 articles
-              - Show article details
-              - Search for specific article/s by given title or category
-              - Register
+Guest:    
+- View all articles
+- Filter top 5 articles
+- Show article details
+- Search for specific article/s by given title or category
+- Register
 
-User:      - Login/Logout
-              - Edit and delete user
-              - Add comment to article
-              - Reply to comment
-              - Like and dislike comment
-              - Download image
+User:
+- Login/Logout
+- Edit and delete user
+- Add comment to article
+- Reply to comment
+- Like and dislike comment
+- Download image
 
-Admin:   - Upload and delete image
-              - Add and delete category
-              - Add, edit and delete article
-              - Find user/s
-              - Delete user
-              
+Admin:
+- Upload and delete image
+- Add and delete category
+- Add, edit and delete article
+- Find user/s
+- Delete user
+             
