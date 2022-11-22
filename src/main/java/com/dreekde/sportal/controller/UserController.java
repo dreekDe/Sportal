@@ -8,7 +8,7 @@ import com.dreekde.sportal.model.dto.user.UserRegisterDTO;
 import com.dreekde.sportal.model.dto.user.UserWithoutPasswordDTO;
 import com.dreekde.sportal.model.exceptions.BadRequestException;
 import com.dreekde.sportal.model.exceptions.MethodNotAllowedException;
-import com.dreekde.sportal.service.impl.UserServiceImpl;
+import com.dreekde.sportal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +31,10 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController extends AbstractController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserServiceImpl userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
