@@ -56,3 +56,6 @@ build/
 /ui/npm-debug.log*
 /ui/yarn-debug.log*
 /ui/yarn-error.log*
+
+# project
+/logs
