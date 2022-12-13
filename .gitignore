@@ -36,6 +36,7 @@ build/
 
 # dependencies
 /ui/node_modules
+/ui/node
 /ui/.pnp
 /ui/.pnp.js
 
